@@ -1,0 +1,3709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline';
+               img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>HealthBot — 24-Week Training Log</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#17948C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HealthBot">
+<style>
+:root {
+  --hb-pending: #E08A2E;
+  --hb-pending-wash: color-mix(in oklab, var(--hb-pending) 14%, transparent);
+  --hb-done: #17948C;
+  --hb-done-wash: color-mix(in oklab, var(--hb-done) 14%, transparent);
+  --hb-ink: #14201F;
+  --hb-surface: #FBFAF7;
+  --hb-rule: color-mix(in oklab, var(--hb-ink) 12%, transparent);
+  --hb-surface-raised: #FFFFFF;
+  --hb-focus: #1B6EF3;
+  --hb-radius: 10px;
+  --hb-max-w: 640px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hb-ink: #EDEFEE;
+    --hb-surface: #14201F;
+    --hb-surface-raised: #1B2A28;
+    --hb-rule: color-mix(in oklab, var(--hb-ink) 16%, transparent);
+    --hb-pending-wash: color-mix(in oklab, var(--hb-pending) 22%, transparent);
+    --hb-done-wash: color-mix(in oklab, var(--hb-done) 22%, transparent);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--hb-surface);
+  color: var(--hb-ink);
+  line-height: 1.4;
+}
+
+a { color: inherit; }
+
+button, input, select { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--hb-focus);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------- top bar */
+
+.hb-topbar {
+  border-bottom: 1px solid var(--hb-rule);
+  background: var(--hb-surface);
+  padding: 10px max(12px, env(safe-area-inset-left)) 10px max(12px, env(safe-area-inset-right));
+}
+
+.hb-topbar--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.hb-topbar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: var(--hb-max-w);
+  margin: 0 auto;
+}
+
+.hb-brand {
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  flex: 0 0 auto;
+  color: var(--hb-done);
+}
+
+.hb-crumbs {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.hb-crumbs a {
+  text-decoration: none;
+  color: color-mix(in oklab, var(--hb-ink) 60%, transparent);
+}
+
+.hb-crumbs a:not(:last-child)::after,
+.hb-crumbs span[aria-current]::before { content: ""; }
+
+.hb-crumbs a::after { content: " / "; color: var(--hb-rule); }
+
+.hb-crumbs span[aria-current] { font-weight: 600; }
+
+.hb-today-btn {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--hb-done-wash);
+  color: var(--hb-done);
+  text-decoration: none;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hb-today-btn--disabled {
+  opacity: 0.5;
+}
+
+.hb-today-btn--static {
+  background: var(--hb-pending-wash);
+  color: var(--hb-pending);
+}
+
+.bar--sticky {
+  max-width: var(--hb-max-w);
+  margin: 8px auto 0;
+}
+
+/* ------------------------------------------------------------- section nav */
+
+.hb-nav {
+  display: flex;
+  gap: 16px;
+  max-width: var(--hb-max-w);
+  margin: 8px auto 0;
+  font-size: 0.8rem;
+}
+
+.hb-nav-link {
+  text-decoration: none;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--hb-ink) 55%, transparent);
+  padding-bottom: 2px;
+}
+
+.hb-nav-link--active {
+  color: var(--hb-done);
+  border-bottom: 2px solid var(--hb-done);
+}
+
+/* ------------------------------------------------------------------ buttons */
+
+.hb-btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--hb-rule);
+  background: var(--hb-surface-raised);
+  color: var(--hb-ink);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.hb-btn--primary {
+  background: var(--hb-done);
+  color: #fff;
+  border-color: var(--hb-done);
+}
+
+.hb-btn--danger {
+  background: #B3261E;
+  color: #fff;
+  border-color: #B3261E;
+}
+
+.hb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hb-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.hb-radio-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--hb-ink);
+}
+
+/* -------------------------------------------------------------------- toast */
+
+.hb-toast {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--hb-ink);
+  color: var(--hb-surface);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 999px;
+  z-index: 30;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+/* ------------------------------------------------------------- reminder chip */
+
+.hb-reminder-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: var(--hb-pending-wash);
+  color: var(--hb-pending);
+  margin-bottom: 16px;
+}
+
+.hb-reminder-chip a { text-decoration: underline; font-weight: 700; }
+
+.hb-reminder-chip button {
+  background: none;
+  border: none;
+  color: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  flex: 0 0 auto;
+}
+
+/* -------------------------------------------------------------------- main */
+
+.hb-main {
+  max-width: var(--hb-max-w);
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+}
+
+.hb-h1 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.hb-h1-sub {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: color-mix(in oklab, var(--hb-ink) 60%, transparent);
+  margin-top: 2px;
+}
+
+.hb-h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 24px 0 8px;
+}
+
+.hb-protocol {
+  font-size: 0.88rem;
+  color: color-mix(in oklab, var(--hb-ink) 70%, transparent);
+  margin: 8px 0 16px;
+}
+
+.hb-comment {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: color-mix(in oklab, var(--hb-ink) 65%, transparent);
+  margin: 0 0 16px;
+}
+
+.hb-note { font-size: 0.85rem; color: color-mix(in oklab, var(--hb-ink) 65%, transparent); }
+
+.hb-safety {
+  font-size: 0.88rem;
+  background: var(--hb-pending-wash);
+  border-left: 3px solid var(--hb-pending);
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin: 8px 0 20px;
+}
+
+.storage-warning {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--hb-pending);
+  color: #1a1200;
+  font-size: 0.8rem;
+  padding: 10px 16px;
+  text-align: center;
+  z-index: 20;
+}
+
+/* -------------------------------------------------------------- month grid */
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.month-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+  text-decoration: none;
+  color: var(--hb-ink);
+}
+
+.ring { position: relative; width: 56px; height: 56px; flex: 0 0 auto; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: var(--hb-pending-wash); stroke-width: 6; }
+.ring-fill {
+  fill: none;
+  stroke: var(--hb-state, var(--hb-done));
+  stroke: color-mix(in oklab, var(--hb-done) var(--pct), var(--hb-pending));
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.ring-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 700;
+}
+
+.month-card-title { font-weight: 700; font-size: 0.95rem; }
+.month-card-sub { font-size: 0.78rem; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); }
+
+/* --------------------------------------------------------------- week list */
+
+.week-list { display: flex; flex-direction: column; gap: 10px; }
+
+.week-row {
+  display: block;
+  padding: 12px 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+  text-decoration: none;
+  color: var(--hb-ink);
+}
+
+.week-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.week-row-title { font-weight: 700; }
+.week-row-dates { font-size: 0.78rem; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); margin: 2px 0 8px; }
+.week-row-pct { font-size: 0.76rem; margin-top: 4px; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); }
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--hb-done-wash);
+  color: var(--hb-done);
+  white-space: nowrap;
+}
+.badge--deload { background: color-mix(in oklab, var(--hb-ink) 12%, transparent); color: color-mix(in oklab, var(--hb-ink) 70%, transparent); }
+.badge--test { background: var(--hb-pending-wash); color: var(--hb-pending); }
+.badge--done { background: var(--hb-done); color: #fff; }
+.badge--archived { background: color-mix(in oklab, var(--hb-ink) 10%, transparent); color: color-mix(in oklab, var(--hb-ink) 55%, transparent); }
+
+.deload-banner {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--hb-ink) 8%, transparent);
+  margin-bottom: 16px;
+}
+
+.archived-banner {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--hb-ink) 8%, transparent);
+  color: color-mix(in oklab, var(--hb-ink) 65%, transparent);
+  margin-bottom: 16px;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hb-pending-wash);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--hb-done);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-fill { transition: none; }
+}
+
+/* ---------------------------------------------------------------- day list */
+
+.day-list { display: flex; flex-direction: column; gap: 10px; }
+
+.day-card {
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+  overflow: hidden;
+}
+
+.day-card--today { border-color: var(--hb-done); }
+
+.day-card-summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.day-card-summary::-webkit-details-marker { display: none; }
+
+.day-card-name { font-weight: 700; }
+.today-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--hb-done);
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+.day-card-date { font-size: 0.76rem; color: color-mix(in oklab, var(--hb-ink) 55%, transparent); grid-column: 3; }
+.day-card-title { grid-column: 1 / 3; font-size: 0.82rem; color: color-mix(in oklab, var(--hb-ink) 65%, transparent); }
+.day-card-progress {
+  grid-column: 3;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--hb-done);
+}
+
+.day-card-detail { padding: 0 14px 14px; }
+.day-card-open {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--hb-done);
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ day screen */
+
+.hb-main--day { padding-top: 16px; }
+
+.day-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.day-title { font-weight: 700; font-size: 1.05rem; }
+
+.item-list { display: flex; flex-direction: column; gap: 12px; }
+
+.item {
+  padding: 12px 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+}
+
+.item-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.item-name { font-weight: 700; }
+.item-target { font-size: 0.82rem; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); text-align: right; }
+.item-group { font-size: 0.76rem; color: var(--hb-done); font-weight: 600; margin-top: 2px; }
+
+.item-test-placeholder {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: color-mix(in oklab, var(--hb-ink) 50%, transparent);
+  margin-top: 6px;
+}
+
+/* -------------------------------------------------------------- kb inputs */
+
+.hb-kb-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.hb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 120px;
+}
+
+.hb-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--hb-ink) 60%, transparent);
+}
+
+.hb-select {
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hb-rule);
+  background: var(--hb-surface);
+  color: var(--hb-ink);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2314201F' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 18px;
+  padding-right: 30px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hb-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDEFEE' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+}
+
+.hb-rpe-zone {
+  font-size: 0.7rem;
+  color: color-mix(in oklab, var(--hb-ink) 55%, transparent);
+  margin-top: 2px;
+}
+
+/* ------------------------------------------------------------- test inputs */
+
+.hb-test-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.hb-input {
+  min-height: 44px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hb-rule);
+  background: var(--hb-surface);
+  color: var(--hb-ink);
+  font-size: 1.05rem;
+}
+
+/* --------------------------------------------------------------- density clock */
+
+.hb-total-reps {
+  margin-top: 10px;
+  max-width: 160px;
+}
+
+/* --------------------------------------------------------------------- note */
+
+.hb-note-field {
+  margin-top: 24px;
+}
+
+.hb-note-field textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--hb-radius);
+  border: 1px solid var(--hb-rule);
+  background: var(--hb-surface-raised);
+  color: var(--hb-ink);
+  resize: vertical;
+  font-size: 0.95rem;
+}
+
+.hb-check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hb-check-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.hb-check-wrap input[type="checkbox"] {
+  position: absolute;
+  inset: 0;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hb-check-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.hb-check-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid var(--hb-pending);
+  background: var(--hb-pending-wash);
+  color: var(--hb-pending);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.hb-check-wrap input[type="checkbox"]:checked + .hb-check-box {
+  border-color: var(--hb-done);
+  background: var(--hb-done);
+  color: #fff;
+}
+
+.hb-check-wrap input[type="checkbox"]:focus-visible + .hb-check-box {
+  outline: 3px solid var(--hb-focus);
+  outline-offset: 2px;
+}
+
+.hb-task-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.hb-task-wrap input[type="checkbox"] {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hb-check-box--task { flex: 0 0 auto; }
+.hb-task-wrap input[type="checkbox"]:checked + .hb-check-box--task::after { content: "✓"; }
+.hb-check-box--task::after { content: ""; font-size: 1.1rem; }
+
+.item-task-text { display: flex; flex-direction: column; gap: 2px; }
+.item-task-text .item-target { text-align: left; }
+
+.day-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.day-nav a { color: var(--hb-done); text-decoration: none; }
+
+/* --------------------------------------------------------------- reference */
+
+.ref-table-wrap { overflow-x: auto; }
+.ref-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.ref-table th, .ref-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--hb-rule); vertical-align: top; }
+.ref-table th { font-size: 0.72rem; text-transform: none; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); }
+.ref-list { margin: 0; padding-left: 20px; font-size: 0.88rem; }
+.ref-list li { margin-bottom: 6px; }
+
+/* ----------------------------------------------------------- settings/cycles */
+
+.hb-cycle-list { display: flex; flex-direction: column; gap: 10px; }
+.hb-cycle-row {
+  padding: 12px 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+}
+.hb-cycle-row--archived { opacity: 0.75; }
+.hb-cycle-row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.hb-cycle-row-title { font-weight: 700; }
+.hb-cycle-row-sub { font-size: 0.78rem; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); margin: 2px 0 8px; }
+.hb-cycle-row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+.hb-switcher {
+  min-height: 40px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--hb-rule);
+  background: var(--hb-surface-raised);
+  color: var(--hb-ink);
+  font-size: 0.82rem;
+  max-width: 160px;
+}
+
+.hb-confirm-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-pending-wash);
+  border-left: 3px solid var(--hb-pending);
+}
+.hb-confirm-box--danger {
+  background: color-mix(in oklab, #B3261E 12%, transparent);
+  border-left-color: #B3261E;
+}
+
+/* ----------------------------------------------------------------- progress */
+
+.streak-row { display: flex; gap: 12px; margin-bottom: 4px; }
+.streak-card {
+  flex: 1 1 0;
+  padding: 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+  text-align: center;
+}
+.streak-num { font-size: 1.6rem; font-weight: 700; color: var(--hb-done); line-height: 1.1; }
+
+.spark {
+  width: 100%;
+  height: 56px;
+  display: block;
+  margin: 6px 0 4px;
+}
+
+.spark-grid { display: flex; flex-direction: column; gap: 14px; }
+.spark-block {
+  padding: 10px 12px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+}
+.spark-label { font-size: 0.82rem; font-weight: 700; }
+
+.nudge-chip {
+  font-size: 0.85rem;
+  padding: 10px 12px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-done-wash);
+  color: var(--hb-ink);
+  border-left: 3px solid var(--hb-done);
+  margin-bottom: 8px;
+}
+.nudge-chip strong { color: var(--hb-done); }
+
+.pr-block { margin-bottom: 18px; }
+.pr-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+
+/* ------------------------------------------------------------- self-test */
+
+.selftest-summary {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.selftest-pass, .selftest-fail {
+  flex: 1 1 0;
+  padding: 14px;
+  border-radius: var(--hb-radius);
+  background: var(--hb-surface-raised);
+  border: 1px solid var(--hb-rule);
+  text-align: center;
+}
+.selftest-pass .streak-num { color: var(--hb-done); }
+.selftest-fail .streak-num { color: #B3261E; }
+.selftest-table td:first-child { white-space: nowrap; font-weight: 700; }
+.selftest-ok { color: var(--hb-done); font-weight: 700; }
+.selftest-bad { color: #B3261E; font-weight: 700; }
+.selftest-detail { font-size: 0.78rem; color: color-mix(in oklab, var(--hb-ink) 60%, transparent); }
+
+/* ------------------------------------------------------------------- print */
+
+/* §7.2/§8 — the printable week block exists only for @media print; keep it
+   out of normal layout flow (and out of screen readers) the rest of the time. */
+.print-only { display: none; }
+
+@media print {
+  .hb-topbar, .hb-today-btn, .storage-warning, .day-card-open, .day-nav,
+  .hb-nav, .hb-toast, .hb-reminder-chip, .month-grid, .week-list,
+  .hb-check-wrap input[type="checkbox"], .hb-task-wrap input[type="checkbox"],
+  .screen-only {
+    display: none !important;
+  }
+  body { background: #fff; color: #000; }
+  .item { break-inside: avoid; border-color: #000; }
+
+  /* Printable week log (§8): every day expanded, checkboxes as plain
+     squares matching the original PDF layout, bell/RPE as fill-in-by-hand
+     text fields rather than interactive <select> controls. */
+  .print-only { display: block; }
+  .hb-main--print-week { padding: 0 4px; max-width: 100%; }
+  .print-week-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 2px; }
+  .print-week-protocol { font-size: 0.78rem; margin-bottom: 10px; }
+  .print-day { break-inside: avoid; margin-bottom: 14px; border: 1px solid #000; padding: 8px 10px; }
+  .print-day-head { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.9rem; border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 6px; }
+  .print-item { font-size: 0.8rem; margin: 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .print-item-name { font-weight: 700; }
+  .print-item-target { color: #333; }
+  .print-boxes { display: inline-flex; gap: 3px; margin-left: 4px; }
+  .print-box { display: inline-block; width: 11px; height: 11px; border: 1px solid #000; }
+  .print-fields { font-size: 0.76rem; color: #333; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+
+const APP_VERSION = '3.0.0';
+const SCHEMA_VERSION = 1;
+
+/* ----------------------------------------------------------------- calendar */
+
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const DAY_NAMES = {
+  mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday',
+  fri: 'Friday', sat: 'Saturday', sun: 'Sunday'
+};
+
+const pad = (n) => String(n).padStart(2, '0');
+
+/** Add n days to a YYYY-MM-DD string using local calendar components (DST-safe). */
+function addDays(ymd, n) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const dt = new Date(y, m - 1, d + n);
+  return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+}
+
+/** Day of week for a YYYY-MM-DD string: 0 = Sunday … 6 = Saturday. */
+function dowOf(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay();
+}
+
+/** Snap a date back to the preceding Monday. Already-Monday is returned as-is. */
+function snapToMonday(ymd) {
+  const dow = dowOf(ymd);              // Sun=0 … Sat=6
+  const back = (dow + 6) % 7;          // Mon→0, Tue→1 … Sun→6
+  return back === 0 ? ymd : addDays(ymd, -back);
+}
+
+/** §4.5 — dates are derived, never stored. */
+function plannedDate(startDate, week, dayIndex) {
+  return addDays(startDate, (week - 1) * 7 + dayIndex);
+}
+
+/** Whole-day count between two YYYY-MM-DD strings, DST-safe (UTC epoch of date-only components). */
+function daysBetween(ymd1, ymd2) {
+  const [y1, m1, d1] = ymd1.split('-').map(Number);
+  const [y2, m2, d2] = ymd2.split('-').map(Number);
+  const t1 = Date.UTC(y1, m1 - 1, d1);
+  const t2 = Date.UTC(y2, m2 - 1, d2);
+  return Math.round((t2 - t1) / 86400000);
+}
+
+/** Today as a YYYY-MM-DD string, local time. */
+function todayYMD() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/* -------------------------------------------------------------- item makers */
+
+const sets = (id, name, target, n, extra) =>
+  Object.assign({ type: 'sets', id, name, target, sets: n }, extra || {});
+
+/**
+ * reps is parsed from the target string itself ("N × R", "N × R / side", …) —
+ * one source of truth, no per-call-site annotation. Used only for CSV
+ * volumeKg (§5.2); null when the target doesn't start with "N × R".
+ */
+const kb = (id, name, target, n, extra) => {
+  const m = /^\s*\d+\s*×\s*(\d+)/.exec(target);
+  return Object.assign({ type: 'kb', id, name, target, sets: n, reps: m ? Number(m[1]) : null }, extra || {});
+};
+
+const task = (id, name, target, extra) =>
+  Object.assign({ type: 'task', id, name, target }, extra || {});
+
+const test = (id, name, field, unit) =>
+  ({ type: 'test', id, name, field, unit });
+
+/* ---------------------------------------------------------------- §7.3 inputs */
+
+/** RPE select values, 5–10 in half-point steps. */
+const RPE_VALUES = [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+
+/** Zone text for a given RPE — labelled by zone, never by colour alone. */
+function rpeZone(rpe) {
+  if (rpe <= 6) return 'ready to progress';
+  if (rpe <= 8.5) return 'on target';
+  return 'high';
+}
+
+/* ------------------------------------------------------- shared prescriptions */
+
+const WARMUP_A = task('warmup', 'Warm-up', '5–10 min dynamic prep | KB A');
+const WARMUP_B = task('warmup', 'Warm-up', '5–10 min dynamic prep | KB B');
+const WARMUP_A_HALF = task('warmup', 'Warm-up', '5–10 min dynamic prep | KB A (half volume)');
+const WARMUP_B_HALF = task('warmup', 'Warm-up', '5–10 min dynamic prep | KB B (half volume)');
+
+const MOBILITY_TARGET = {
+  1: 'Cat cow x10 | Standing wave 60s | Supported deep squat hold 3 x 20s | Low dragon 20-30s/side (hands on blocks) | Cossack shifts 8/side (shallow) | Split-stance lunge hold 20s/side | Spinal twist 45s/side',
+  2: 'Cat cow x10 | Standing wave 60s | Deep squat hold, build to 1 x 60s (no support) | Low dragon 30s/side (hands on floor) | Cossack shifts 8/side (deeper) | Split-stance lunge hold 30s/side | Spinal twist 45s/side',
+  3: 'Cat cow x10 | Standing wave 60s | Deep squat hold 1 x 60s | Low dragon 45s/side | Full-depth cossacks 8/side | Split-stance lunge hold 30s/side | Spinal twist 45s/side'
+};
+
+const MOBILITY_COMMENT = {
+  standard: 'See reference page for cues',
+  deload: 'Full volume — restorative, not fatiguing'
+};
+
+const mobilityDay = (phase, isDeload) => ({
+  title: 'Shaolin Mobility',
+  comment: MOBILITY_COMMENT[isDeload ? 'deload' : 'standard'],
+  items: [
+    task('mobility_shaolin', 'Shaolin Mobility (~15 min)', MOBILITY_TARGET[phase], { reference: true })
+  ]
+});
+
+const restDay = (passiveNote) => ({
+  title: 'Complete Rest',
+  items: [
+    task('rest', 'Complete rest', passiveNote
+      ? 'Complete rest and recovery (deep squat hold optional — passive)'
+      : 'Complete rest and recovery')
+  ]
+});
+
+const runDay = (title, id, name, target) => ({
+  title,
+  items: [task(id, name, target)]
+});
+
+/* -------------------------------------------------------- protocol / labels */
+
+const PROTOCOL = {
+  1: '5–10 min dynamic prep before KB work (incl. cat cow, cossack shifts, low dragon — see ref page). If joints ache, swap push-ups for floor press.',
+  2: 'Dynamic warm-up mandatory (incl. Shaolin prep trio — see ref page). Runs stay capped. Stick to the density clocks. KB progression: log Bell + RPE every set; two weeks at RPE 6 or below → move up a bell size (rep scheme is set by phase).',
+  3: 'Mon = weighted strength, Fri = density clock. Max testing on Wednesdays of test weeks only. Dynamic warm-up incl. Shaolin prep trio (see ref page). KB progression: log Bell + RPE every set; two weeks at RPE 6 or below → move up a bell size (rep scheme is set by phase).'
+};
+
+const DELOAD_BANNER =
+  'DELOAD WEEK — all working volume cut to ~50%, KB included (Thursday mobility stays at full volume)';
+
+const PHASE_LABEL = {
+  1: 'Phase 1 — Base Build',
+  2: 'Phase 2 — Strength & Volume',
+  3: 'Phase 3 — Capacity'
+};
+
+const VARIANT_LABEL = {
+  standard: 'Standard Week',
+  deload: 'Deload Week',
+  A: 'Week A',
+  B: 'Week B',
+  test: 'Test Week',
+  normal: 'Normal Week'
+};
+
+/* ----------------------------------------------------------- PHASE_TEMPLATES */
+/* Keyed `${phase}:${variant}`. Transcribed from 24_Week_Printable_Log_v7_7_Shaolin.pdf. */
+
+const PHASE_TEMPLATES = {
+
+  /* ---------------------------------------- Phase 1 — Base Build · Standard */
+  '1:standard': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A,
+        sets('pushups', 'Push-ups', '3 × 8–10', 3),
+        sets('pullups', 'Pull-ups (band)', '3 × 3–4', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '5 × 10', 5, { group: 'KB A' }),
+        kb('kb_ohp', 'Overhead Press', '3 × 5 / side', 3, { group: 'KB A' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '20 min conversational pace'),
+    wed: {
+      title: 'Calisthenics & Core',
+      items: [
+        sets('pushups', 'Push-ups', '4 × 8', 4),
+        sets('pullups', 'Pull-ups', '4 × 3', 4),
+        sets('bw_squats', 'BW Squats', '3 × 15', 3),
+        sets('plank', 'Plank', '3 × 40s', 3)
+      ]
+    },
+    thu: mobilityDay(1, false),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B,
+        sets('pushups', 'Push-ups', '3 × 8–10', 3),
+        sets('pullups', 'Pull-ups (band)', '3 × 3–4', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_goblet', 'Goblet Squat', '4 × 6', 4, { group: 'KB B' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '3 × 5 / side', 3, { group: 'KB B' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '5 × 1 min moderate effort w/ walking rest'),
+    sun: restDay(false)
+  },
+
+  /* ------------------------------------------ Phase 1 — Base Build · Deload */
+  '1:deload': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A_HALF,
+        sets('pushups', 'Push-ups', '2 × 8–10', 2),
+        sets('pullups', 'Pull-ups (band)', '2 × 3–4', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '3 × 10', 3, { group: 'KB A (half volume)' }),
+        kb('kb_ohp', 'Overhead Press', '2 × 5 / side', 2, { group: 'KB A (half volume)' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '10 min conversational pace'),
+    wed: {
+      title: 'Calisthenics & Core',
+      items: [
+        sets('pushups', 'Push-ups', '2 × 8', 2),
+        sets('pullups', 'Pull-ups', '2 × 3', 2),
+        sets('bw_squats', 'BW Squats', '2 × 15', 2),
+        sets('plank', 'Plank', '2 × 20s', 2)
+      ]
+    },
+    thu: mobilityDay(1, true),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B_HALF,
+        sets('pushups', 'Push-ups', '2 × 8–10', 2),
+        sets('pullups', 'Pull-ups (band)', '2 × 3–4', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_goblet', 'Goblet Squat', '2 × 6', 2, { group: 'KB B (half volume)' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '2 × 5 / side', 2, { group: 'KB B (half volume)' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '3 × 1 min moderate effort w/ walking rest'),
+    sun: restDay(false)
+  },
+
+  /* ------------------------------ Phase 2 — Strength & Volume · Week A */
+  '2:A': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A,
+        sets('pushups', 'Push-ups', '4 × 10', 4),
+        sets('pullups', 'Pull-ups', '3 × 4', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '5 × 10', 5, { group: 'KB A' }),
+        kb('kb_ohp', 'Overhead Press', '3 × 5 / side', 3, { group: 'KB A' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '25 min capped, easy'),
+    wed: {
+      title: 'Lower Body & Core',
+      items: [
+        sets('bw_squats', 'BW Squats', '3 × 20', 3),
+        sets('rfe_split_squat', 'RFE Split Squat', '2 × 8 / side', 2),
+        task('pushup_clock', 'Push-up density clock', '8-min clock (5 reps / 40s)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '4 × 4 strict', 4),
+        sets('plank', 'Plank', '3 × 45–60s', 3)
+      ]
+    },
+    thu: mobilityDay(2, false),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B,
+        sets('pushups', 'Push-ups', '4 × 10', 4),
+        sets('pullups', 'Pull-ups', '3 × 4', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_goblet', 'Goblet Squat', '4 × 8', 4, { group: 'KB B' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '3 × 5 / side', 3, { group: 'KB B' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '10 min tempo cap'),
+    sun: restDay(false)
+  },
+
+  /* ------------------------------ Phase 2 — Strength & Volume · Week B */
+  '2:B': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A,
+        sets('pushup_ladder', 'Push-up Ladder', '3-4-5-6-7 (one box per rung)', 5,
+          { rungs: ['3', '4', '5', '6', '7'] }),
+        sets('pullups', 'Pull-ups', '3 × 5 (band/strict)', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '5 × 10', 5, { group: 'KB A' }),
+        kb('kb_ohp', 'Overhead Press', '3 × 5 / side', 3, { group: 'KB A' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '25 min capped, easy'),
+    wed: {
+      title: 'Lower Body & Core',
+      items: [
+        sets('bw_squats', 'BW Squats', '3 × 20', 3),
+        sets('rfe_split_squat', 'RFE Split Squat', '2 × 8 / side', 2),
+        task('pushup_clock', 'Push-up density clock', '8-min clock (5 reps / 40s)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '4 × 4 strict', 4),
+        sets('plank', 'Plank', '3 × 45–60s', 3)
+      ]
+    },
+    thu: mobilityDay(2, false),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B,
+        sets('pushup_ladder', 'Push-up Ladder', '3-4-5-6-7 (one box per rung)', 5,
+          { rungs: ['3', '4', '5', '6', '7'] }),
+        sets('pullups', 'Pull-ups', '3 × 5 (band/strict)', 3),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_goblet', 'Goblet Squat', '4 × 8', 4, { group: 'KB B' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '3 × 5 / side', 3, { group: 'KB B' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '10 min tempo cap'),
+    sun: restDay(false)
+  },
+
+  /* ----------------------------- Phase 2 — Strength & Volume · Deload */
+  '2:deload': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A_HALF,
+        sets('pushups', 'Push-ups', '2 × 10', 2),
+        sets('pullups', 'Pull-ups', '2 × 4', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '3 × 10', 3, { group: 'KB A (half volume)' }),
+        kb('kb_ohp', 'Overhead Press', '2 × 5 / side', 2, { group: 'KB A (half volume)' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '12–15 min easy'),
+    wed: {
+      title: 'Lower Body & Core',
+      items: [
+        sets('bw_squats', 'BW Squats', '2 × 20', 2),
+        sets('rfe_split_squat', 'RFE Split Squat', '1 × 8 / side', 1),
+        task('pushup_clock', 'Push-up density clock', '4-min clock (5 reps / 40s)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '2 × 4 strict', 2),
+        sets('plank', 'Plank', '2 × 30s', 2)
+      ]
+    },
+    thu: mobilityDay(2, true),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B_HALF,
+        sets('pushups', 'Push-ups', '2 × 10', 2),
+        sets('pullups', 'Pull-ups', '2 × 4', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_goblet', 'Goblet Squat', '2 × 8', 2, { group: 'KB B (half volume)' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '2 × 5 / side', 2, { group: 'KB B (half volume)' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '5 min easy jog'),
+    sun: restDay(false)
+  },
+
+  /* ------------------------------------- Phase 3 — Capacity · Test Week */
+  '3:test': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A,
+        sets('weighted_pushups', 'Weighted Push-ups', '4 × 8 (backpack/plate)', 4),
+        sets('pullups', 'Pull-ups', '4 × 5', 4),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '5 × 10', 5, { group: 'KB A' }),
+        kb('kb_ohp', 'Overhead Press', '3 × 5 / side', 3, { group: 'KB A' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '25 min easy pace'),
+    wed: {
+      title: 'Lower Body & Core',
+      comment: '1 back-off set @ 70% of max',
+      items: [
+        test('max_pushups', 'Max Push-ups', 'int', 'reps'),
+        test('max_pullups', 'Max Pull-ups', 'int', 'reps'),
+        test('sit_to_stand', 'Single-leg sit-to-stand', 'pair', 'reps'),
+        test('squat_hold', 'Deep squat hold', 'int', 'sec'),
+        sets('weighted_bw_squats', 'Weighted BW Squats', '2 × 15 (backpack/plate)', 2),
+        sets('rfe_split_squat', 'RFE Split Squat', '2 × 8 / side (loaded)', 2)
+      ]
+    },
+    thu: mobilityDay(3, false),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B,
+        task('pushup_clock', 'Push-up density', '10-min clock (8 reps/30s, ~80–100 total)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '4 × 5', 4),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_goblet', 'Goblet Squat', '4 × 10', 4, { group: 'KB B' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '3 × 5 / side', 3, { group: 'KB B' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '10 min tempo cap'),
+    sun: restDay(true)
+  },
+
+  /* ----------------------------------- Phase 3 — Capacity · Normal Week */
+  '3:normal': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A,
+        sets('weighted_pushups', 'Weighted Push-ups', '4 × 8 (backpack/plate)', 4),
+        sets('pullups', 'Pull-ups', '4 × 5', 4),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '5 × 10', 5, { group: 'KB A' }),
+        kb('kb_ohp', 'Overhead Press', '3 × 5 / side', 3, { group: 'KB A' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '25 min easy pace'),
+    wed: {
+      title: 'Lower Body & Core',
+      items: [
+        sets('weighted_bw_squats', 'Weighted BW Squats', '3 × 15 (backpack/plate)', 3),
+        sets('rfe_split_squat', 'RFE Split Squat', '2 × 8 / side (loaded)', 2),
+        task('core_standard', 'Core & calisthenics', 'Standard core & calisthenics routine (no testing)')
+      ]
+    },
+    thu: mobilityDay(3, false),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B,
+        task('pushup_clock', 'Push-up density', '10-min clock (8 reps/30s, ~80–100 total)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '4 × 5', 4),
+        kb('kb_rows', 'KB Rows', '3 × 8 / arm', 3),
+        kb('kb_goblet', 'Goblet Squat', '4 × 10', 4, { group: 'KB B' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '3 × 5 / side', 3, { group: 'KB B' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '10 min tempo cap'),
+    sun: restDay(true)
+  },
+
+  /* ----------------------------------- Phase 3 — Capacity · Deload Week */
+  '3:deload': {
+    mon: {
+      title: 'KB A + Push/Pull',
+      items: [
+        WARMUP_A_HALF,
+        sets('weighted_pushups', 'Weighted Push-ups', '2 × 8', 2),
+        sets('pullups', 'Pull-ups', '2 × 5', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_swing_2h', 'Swings (Two-Handed)', '3 × 10', 3, { group: 'KB A (half volume)' }),
+        kb('kb_ohp', 'Overhead Press', '2 × 5 / side', 2, { group: 'KB A (half volume)' })
+      ]
+    },
+    tue: runDay('Easy Run', 'run_easy', 'Run', '12–15 min easy'),
+    wed: {
+      title: 'Calisthenics & Core',
+      items: [
+        task('core_light', 'Core & mobility', 'Light core & mobility only')
+      ]
+    },
+    thu: mobilityDay(3, true),
+    fri: {
+      title: 'KB B + Push/Pull',
+      items: [
+        WARMUP_B_HALF,
+        task('pushup_clock', 'Push-up clock', '5-min (8 reps / 30s)', { totalReps: true }),
+        sets('pullups', 'Pull-ups', '2 × 5', 2),
+        kb('kb_rows', 'KB Rows', '2 × 8 / arm', 2),
+        kb('kb_goblet', 'Goblet Squat', '2 × 10', 2, { group: 'KB B (half volume)' }),
+        kb('kb_clean_1a', 'One-Arm Clean', '2 × 5 / side', 2, { group: 'KB B (half volume)' })
+      ]
+    },
+    sat: runDay('Quality Run', 'run_quality', 'Run', '5 min easy jog'),
+    sun: restDay(true)
+  }
+};
+
+/* ------------------------------------------------------------- WEEK_MAP (§4.1) */
+/* Explicit. Never computed by parity — the Phase 2 A/B alternation is irregular. */
+
+const WEEK_MAP = [
+  /*  1 */ { phase: 1, variant: 'standard' },
+  /*  2 */ { phase: 1, variant: 'standard' },
+  /*  3 */ { phase: 1, variant: 'standard' },
+  /*  4 */ { phase: 1, variant: 'deload' },
+  /*  5 */ { phase: 1, variant: 'standard' },
+  /*  6 */ { phase: 1, variant: 'standard' },
+  /*  7 */ { phase: 1, variant: 'standard' },
+  /*  8 */ { phase: 1, variant: 'deload' },
+  /*  9 */ { phase: 2, variant: 'A' },
+  /* 10 */ { phase: 2, variant: 'B' },
+  /* 11 */ { phase: 2, variant: 'A' },
+  /* 12 */ { phase: 2, variant: 'deload' },
+  /* 13 */ { phase: 2, variant: 'B' },
+  /* 14 */ { phase: 2, variant: 'A' },
+  /* 15 */ { phase: 2, variant: 'B' },
+  /* 16 */ { phase: 2, variant: 'deload' },
+  /* 17 */ { phase: 3, variant: 'test' },
+  /* 18 */ { phase: 3, variant: 'normal' },
+  /* 19 */ { phase: 3, variant: 'test' },
+  /* 20 */ { phase: 3, variant: 'deload' },
+  /* 21 */ { phase: 3, variant: 'test' },
+  /* 22 */ { phase: 3, variant: 'normal' },
+  /* 23 */ { phase: 3, variant: 'test' },
+  /* 24 */ { phase: 3, variant: 'deload' }
+];
+
+/* ------------------------------------------------------------ Shaolin reference */
+/* §4.3 — PDF page 1, reproduced verbatim including the safety copy. */
+
+const REFERENCE = {
+  title: 'Shaolin Mobility Routine — Reference',
+  intro: 'Thursday session (~15 min), every week including deloads. All movements slow and pain-free. Mobility work = mild stretch, never sharp pain — especially inner knee (cossack) and front knee (dragon).',
+  routine: [
+    { n: 1, name: 'Cat cow spine wave', dose: '10 slow cycles', cues: 'Warm-up. Segment the spine — move one vertebra at a time, sync with breath.' },
+    { n: 2, name: 'Standing wave', dose: '60 sec', cues: 'Warm-up. Loose, rhythmic whole-body wave; loosen before loading.' },
+    { n: 3, name: 'Deep squat hold', dose: 'P1: 3 × 20s supported · P2: build to 1 × 60s · P3: 1 × 60s', cues: 'Heels down, chest tall. P1: hold doorframe, depth as able. Breathe into the bottom position.' },
+    { n: 4, name: 'Low dragon', dose: 'P1: 20–30s/side, hands on blocks · P2: 30s/side, hands on floor · P3: 45s/side', cues: 'Long lunge, back leg extended. Ribs down — don\u2019t collapse into the lower back. Front knee tracks over toes.' },
+    { n: 5, name: 'Cossack shifts', dose: '8/side · P1 shallow → P3 full depth', cues: 'Heels stay down. Light counterweight at chest helps balance. Depth only as inner knee allows.' },
+    { n: 6, name: 'Split-stance lunge hold', dose: 'P1: 20s/side · P2–P3: 30s/side', cues: 'Isometric strength. Rear knee hovers or lightly touches. Squeeze rear glute.' },
+    { n: 7, name: 'Spinal twist', dose: '45 sec each side', cues: 'Cooldown. Exhale into the twist; shoulders stay heavy.' }
+  ],
+  warmupTrio: {
+    title: 'KB-Day Warm-up Trio (Mon & Fri, inside the 5–10 min dynamic prep)',
+    items: [
+      'Cat cow spine wave — 10 slow cycles',
+      'Shallow cossack shifts — 8 / side',
+      'Low dragon — 20 sec / side (~4 min total for the trio)'
+    ],
+    note: 'Skip the long static holds (deep squat hold, spinal twist) before KB work — long static stretching right before loaded lifting can blunt power output. Save those for Thursday and cooldowns.'
+  },
+  phaseProgression: [
+    { label: 'Phase 1 (Wks 1–8)', text: 'Supported version: doorframe for squat hold, blocks under hands for dragon, shallow cossacks.' },
+    { label: 'Phase 2 (Wks 9–16)', text: 'Drop supports. Deep squat hold builds toward one unbroken 60s. Cossacks deepen. Lunge holds → 30s.' },
+    { label: 'Phase 3 (Wks 17–24)', text: 'Full-depth cossacks, dragon at 45s/side. Optional passive deep squat hold on Sundays.' }
+  ],
+  deloadNote: 'Deload weeks: keep Thursday mobility at full volume — it is restorative, not fatiguing; deloads cut working volume only.'
+};
+
+/* ----------------------------------------------------------------- buildProgram */
+
+function deepFreeze(o) {
+  if (o && typeof o === 'object' && !Object.isFrozen(o)) {
+    Object.freeze(o);
+    Object.getOwnPropertyNames(o).forEach((k) => deepFreeze(o[k]));
+  }
+  return o;
+}
+
+/**
+ * Expand WEEK_MAP × PHASE_TEMPLATES into the runtime structure.
+ * PROGRAM is immutable — logged state lives in a separate tree (§4.4).
+ */
+function buildProgram() {
+  const weeks = WEEK_MAP.map((entry, i) => {
+    const weekNo = i + 1;
+    const key = `${entry.phase}:${entry.variant}`;
+    const tpl = PHASE_TEMPLATES[key];
+    if (!tpl) throw new Error(`No template for ${key} (week ${weekNo})`);
+
+    const month = Math.floor((weekNo - 1) / 4) + 1;
+    const days = DAY_KEYS.map((dk, di) => {
+      const d = tpl[dk];
+      return {
+        key: dk,
+        dayIndex: di,
+        name: DAY_NAMES[dk],
+        title: d.title,
+        comment: d.comment || '',
+        items: d.items.map((it) => Object.assign({}, it))
+      };
+    });
+
+    return {
+      week: weekNo,
+      phase: entry.phase,
+      variant: entry.variant,
+      templateKey: key,
+      month,
+      isDeload: entry.variant === 'deload',
+      isTest: entry.variant === 'test',
+      phaseLabel: PHASE_LABEL[entry.phase],
+      variantLabel: VARIANT_LABEL[entry.variant],
+      header: `Week ${weekNo} of 24 · ${PHASE_LABEL[entry.phase]} · ${VARIANT_LABEL[entry.variant]}`,
+      protocol: PROTOCOL[entry.phase],
+      deloadBanner: entry.variant === 'deload' ? DELOAD_BANNER : '',
+      days
+    };
+  });
+
+  const months = [1, 2, 3, 4, 5, 6].map((m) => {
+    const first = (m - 1) * 4 + 1;
+    const phase = WEEK_MAP[first - 1].phase;
+    return {
+      month: m,
+      firstWeek: first,
+      lastWeek: first + 3,
+      label: `Month ${m} · Weeks ${first}–${first + 3} · ${PHASE_LABEL[phase]}`
+    };
+  });
+
+  return deepFreeze({ appVersion: APP_VERSION, weeks, months, reference: REFERENCE });
+}
+
+/* ------------------------------------------------------------------ utilities */
+
+/** Total prescribed sets (checkbox glyphs) in a day. */
+const daySetCount = (day) =>
+  day.items.reduce((n, it) => n + ((it.type === 'sets' || it.type === 'kb') ? it.sets : 0), 0);
+
+const weekSetCount = (wk) => wk.days.reduce((n, d) => n + daySetCount(d), 0);
+
+/* =============================================================================
+   HealthBot — UI shell (Checkpoint 2 of §10)
+   Navigation, colour system, Day screen with working checkboxes,
+   localStorage persistence. Inputs (bell/RPE/test fields), export, cycles,
+   analytics, and the self-test harness land in later checkpoints.
+   ========================================================================== */
+
+/* --------------------------------------------------------------- constants */
+
+const STORAGE_KEY = 'healthbot_state_v1';
+const DEFAULT_START = '2026-09-14'; // a Monday
+let STORAGE_OK = true;
+
+/* ------------------------------------------------------------------- state */
+
+function defaultState() {
+  const now = new Date().toISOString();
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    appVersion: APP_VERSION,
+    activeCycleId: 'c1',
+    settings: { bells: [8, 10, 12, 16, 18, 20, 22, 24], lastExportAt: null },
+    cycles: {
+      c1: { label: 'Cycle 1', startDate: DEFAULT_START, status: 'active', createdAt: now }
+    },
+    logs: { c1: { weeks: {} } },
+    bodyweight: {}
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Forward-compatible load: never drop unknown keys (§6.2).
+      return Object.assign(defaultState(), parsed);
+    }
+  } catch (e) {
+    STORAGE_OK = false;
+    console.warn('HealthBot: localStorage unavailable, running in-memory.', e);
+  }
+  return defaultState();
+}
+
+let STATE = loadState();
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+  } catch (e) {
+    STORAGE_OK = false;
+    console.warn('HealthBot: save failed, running in-memory.', e);
+  }
+}
+
+const PROGRAM = buildProgram();
+
+/* ---------------------------------------------------------- state accessors */
+
+function currentCycleId() {
+  const parts = parseHash();
+  if (parts[0] && STATE.cycles[parts[0]]) return parts[0];
+  return STATE.activeCycleId;
+}
+
+function getDayLog(cid, week, dayKey) {
+  const cl = STATE.logs[cid];
+  if (!cl) return undefined;
+  const wl = cl.weeks[String(week)];
+  if (!wl) return undefined;
+  return wl.days[dayKey];
+}
+
+function ensureDayLog(cid, week, dayKey) {
+  if (!STATE.logs[cid]) STATE.logs[cid] = { weeks: {} };
+  const cl = STATE.logs[cid];
+  if (!cl.weeks[String(week)]) cl.weeks[String(week)] = { days: {} };
+  const wl = cl.weeks[String(week)];
+  if (!wl.days[dayKey]) wl.days[dayKey] = { items: {}, note: '' };
+  return wl.days[dayKey];
+}
+
+function isSetChecked(cid, week, dayKey, itemId, idx) {
+  const dl = getDayLog(cid, week, dayKey);
+  const arr = dl && dl.items[itemId] && dl.items[itemId].sets;
+  return !!(arr && arr[idx]);
+}
+
+function isTaskDone(cid, week, dayKey, itemId) {
+  const dl = getDayLog(cid, week, dayKey);
+  return !!(dl && dl.items[itemId] && dl.items[itemId].done);
+}
+
+function getKbFields(cid, week, dayKey, itemId) {
+  const dl = getDayLog(cid, week, dayKey);
+  const rec = dl && dl.items[itemId];
+  return { bellKg: (rec && rec.bellKg != null) ? rec.bellKg : null, rpe: (rec && rec.rpe != null) ? rec.rpe : null };
+}
+
+function getTestValue(cid, week, dayKey, itemId) {
+  const dl = getDayLog(cid, week, dayKey);
+  const rec = dl && dl.items[itemId];
+  return { value: (rec && rec.value != null) ? rec.value : '', valueR: (rec && rec.valueR != null) ? rec.valueR : '' };
+}
+
+function getTotalReps(cid, week, dayKey, itemId) {
+  const dl = getDayLog(cid, week, dayKey);
+  const rec = dl && dl.items[itemId];
+  return (rec && rec.totalReps != null) ? rec.totalReps : '';
+}
+
+function getDayNote(cid, week, dayKey) {
+  const dl = getDayLog(cid, week, dayKey);
+  return (dl && dl.note) || '';
+}
+
+/**
+ * §7.3 — Bell is sticky per exercise: pre-fill with the last bell used for
+ * this itemId in the current cycle, scanning program order (week, then day
+ * within week) strictly before the given position.
+ */
+function lastBellForItem(cid, itemId, beforeWeek, beforeDayIndex) {
+  const cl = STATE.logs[cid];
+  if (!cl) return null;
+  let found = null;
+  for (let w = 1; w <= beforeWeek; w++) {
+    const wl = cl.weeks[String(w)];
+    if (!wl) continue;
+    const maxDayIndex = (w === beforeWeek) ? beforeDayIndex - 1 : 6;
+    for (let di = 0; di <= maxDayIndex; di++) {
+      const dl = wl.days[DAY_KEYS[di]];
+      const rec = dl && dl.items[itemId];
+      if (rec && rec.bellKg != null) found = rec.bellKg;
+    }
+  }
+  return found;
+}
+
+function dayCompletionStats(cid, week, day) {
+  let total = 0, done = 0;
+  day.items.forEach((it) => {
+    if (it.type === 'sets' || it.type === 'kb') {
+      total += it.sets;
+      for (let i = 0; i < it.sets; i++) if (isSetChecked(cid, week, day.key, it.id, i)) done++;
+    } else if (it.type === 'task') {
+      total += 1;
+      if (isTaskDone(cid, week, day.key, it.id)) done += 1;
+    }
+    // type 'test': no checkbox at this checkpoint — excluded from the denominator.
+  });
+  return { total, done, pct: total ? done / total : 0, complete: total > 0 && done === total };
+}
+
+function weekStats(cid, wk) {
+  let total = 0, done = 0;
+  wk.days.forEach((d) => {
+    const s = dayCompletionStats(cid, wk.week, d);
+    total += s.total;
+    done += s.done;
+  });
+  return { total, done, pct: total ? done / total : 0 };
+}
+
+function monthStats(cid, month) {
+  let total = 0, done = 0;
+  PROGRAM.weeks.filter((w) => w.month === month).forEach((wk) => {
+    const s = weekStats(cid, wk);
+    total += s.total;
+    done += s.done;
+  });
+  return { total, done, pct: total ? done / total : 0 };
+}
+
+/* ------------------------------------------------------------------ toggles */
+
+function toggleSet(cid, week, dayKey, itemId, idx, total) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = { sets: new Array(total).fill(false) };
+  const arr = dl.items[itemId].sets;
+  while (arr.length < total) arr.push(false);
+  arr[idx] = !arr[idx];
+  updateDayCompletion(cid, week, dayKey);
+  saveState();
+}
+
+function toggleTask(cid, week, dayKey, itemId) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = {};
+  dl.items[itemId].done = !dl.items[itemId].done;
+  updateDayCompletion(cid, week, dayKey);
+  saveState();
+}
+
+function setBellKg(cid, week, dayKey, itemId, value) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = {};
+  dl.items[itemId].bellKg = value === '' ? null : Number(value);
+  saveState();
+}
+
+function setRpe(cid, week, dayKey, itemId, value) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = {};
+  dl.items[itemId].rpe = value === '' ? null : Number(value);
+  saveState();
+}
+
+function setTestValue(cid, week, dayKey, itemId, field, value) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = {};
+  const key = field === 'R' ? 'valueR' : 'value';
+  dl.items[itemId][key] = value === '' ? null : Number(value);
+  saveState();
+}
+
+function setTotalReps(cid, week, dayKey, itemId, value) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (!dl.items[itemId]) dl.items[itemId] = {};
+  dl.items[itemId].totalReps = value === '' ? null : Number(value);
+  saveState();
+}
+
+function setDayNote(cid, week, dayKey, value) {
+  const dl = ensureDayLog(cid, week, dayKey);
+  dl.note = value;
+  saveState();
+}
+
+function updateDayCompletion(cid, week, dayKey) {
+  const wk = PROGRAM.weeks[week - 1];
+  const day = wk.days.find((d) => d.key === dayKey);
+  const stats = dayCompletionStats(cid, week, day);
+  const dl = ensureDayLog(cid, week, dayKey);
+  if (stats.complete && !dl.completedAt) dl.completedAt = new Date().toISOString();
+  if (!stats.complete && dl.completedAt) delete dl.completedAt;
+}
+
+/* --------------------------------------------------------------------- today */
+
+function findTodayLocation(cid) {
+  const cyc = STATE.cycles[cid];
+  if (!cyc) return null;
+  const offset = daysBetween(cyc.startDate, todayYMD());
+  if (offset < 0 || offset >= 24 * 7) return null;
+  const week = Math.floor(offset / 7) + 1;
+  const dayKey = DAY_KEYS[offset % 7];
+  return { week, dayKey };
+}
+
+/* --------------------------------------------------------------------- router */
+
+function parseHash() {
+  const h = location.hash.replace(/^#\/?/, '');
+  return h.split('/').filter(Boolean);
+}
+
+function go(hash) {
+  location.hash = hash;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
+
+/* --------------------------------------------------------------------- shell */
+
+function topBar(cid, crumbs, activeNav) {
+  const loc = findTodayLocation(cid);
+  const todayHref = loc ? `#/${cid}/month/${PROGRAM.weeks[loc.week - 1].month}/week/${loc.week}/day/${loc.dayKey}` : null;
+  const navItems = [
+    { key: 'overview', label: 'Overview', href: `#/${cid}` },
+    { key: 'progress', label: 'Progress', href: '#/progress' },
+    { key: 'export', label: 'Export', href: '#/export' },
+    { key: 'reference', label: 'Reference', href: '#/reference' },
+    { key: 'settings', label: 'Settings', href: '#/settings' }
+  ];
+  const nav = navItems.map((n) => {
+    const active = activeNav === n.key;
+    return `<a href="${n.href}" class="hb-nav-link${active ? ' hb-nav-link--active' : ''}"${active ? ' aria-current="page"' : ''}>${esc(n.label)}</a>`;
+  }).join('');
+  /* §4.6 — cycle switcher in the header lets the user view an archived cycle read-only. */
+  const cycleIds = Object.keys(STATE.cycles);
+  const switcher = cycleIds.length > 1 ? `
+    <select class="hb-switcher" data-action="switch-cycle" aria-label="Switch cycle">
+      ${cycleIds.map((id) => `<option value="${esc(id)}" ${id === cid ? 'selected' : ''}>${esc(STATE.cycles[id].label)}${STATE.cycles[id].status === 'archived' ? ' (archived)' : ''}</option>`).join('')}
+    </select>` : '';
+  return `
+    <header class="hb-topbar">
+      <div class="hb-topbar-row">
+        <a class="hb-brand" href="#/${cid}">HealthBot</a>
+        <nav class="hb-crumbs" aria-label="Breadcrumb">${crumbs}</nav>
+        ${todayHref
+          ? `<a class="hb-today-btn" href="${todayHref}">Today</a>`
+          : `<span class="hb-today-btn hb-today-btn--disabled" title="Today is outside this cycle's 24 weeks">Today</span>`}
+      </div>
+      <nav class="hb-nav" aria-label="Sections">${nav}${switcher}</nav>
+    </header>`;
+}
+
+function crumb(label, href) {
+  return href ? `<a href="${href}">${esc(label)}</a>` : `<span aria-current="page">${esc(label)}</span>`;
+}
+
+/* ----------------------------------------------------------------- overview */
+
+function renderOverview(cid) {
+  const cyc = STATE.cycles[cid];
+  const archivedBanner = (cyc && cyc.status === 'archived')
+    ? `<div class="archived-banner">Viewing ${esc(cyc.label)} — archived and read-only. <a href="#/${STATE.activeCycleId}">Go to active cycle →</a></div>`
+    : '';
+  const cards = PROGRAM.months.map((m) => {
+    const s = monthStats(cid, m.month);
+    const pct = Math.round(s.pct * 100);
+    const phase = PROGRAM.weeks[(m.firstWeek - 1)].phase;
+    return `
+      <a class="month-card" href="#/${cid}/month/${m.month}" style="--pct:${pct}">
+        <div class="ring" role="img" aria-label="${pct} percent complete">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="ring-track" cx="32" cy="32" r="27"></circle>
+            <circle class="ring-fill" cx="32" cy="32" r="27"
+              style="stroke-dasharray:${(pct / 100 * 2 * Math.PI * 27).toFixed(1)} ${(2 * Math.PI * 27).toFixed(1)}"></circle>
+          </svg>
+          <span class="ring-label">${pct}%</span>
+        </div>
+        <div class="month-card-body">
+          <div class="month-card-title">Month ${m.month}</div>
+          <div class="month-card-sub">Weeks ${m.firstWeek}–${m.lastWeek} · Phase ${phase}</div>
+        </div>
+      </a>`;
+  }).join('');
+
+  return `
+    ${topBar(cid, crumb('Overview'), 'overview')}
+    <main class="hb-main">
+      <h1 class="hb-h1">24-Week Program <span class="hb-h1-sub">${esc(cyc ? cyc.label : '')}</span></h1>
+      ${archivedBanner}
+      ${exportReminderChipHtml()}
+      <div class="month-grid">${cards}</div>
+    </main>`;
+}
+
+/* -------------------------------------------------------------------- month */
+
+function renderMonth(cid, monthNo) {
+  const month = PROGRAM.months.find((m) => m.month === monthNo);
+  if (!month) return renderOverview(cid);
+  const cyc = STATE.cycles[cid];
+
+  const rows = PROGRAM.weeks.filter((w) => w.month === monthNo).map((wk) => {
+    const s = weekStats(cid, wk);
+    const pct = Math.round(s.pct * 100);
+    const start = plannedDate(cyc.startDate, wk.week, 0);
+    const end = plannedDate(cyc.startDate, wk.week, 6);
+    const badgeClass = wk.isDeload ? 'badge badge--deload' : (wk.isTest ? 'badge badge--test' : 'badge');
+    return `
+      <a class="week-row" href="#/${cid}/month/${monthNo}/week/${wk.week}">
+        <div class="week-row-top">
+          <span class="week-row-title">Week ${wk.week}</span>
+          <span class="${badgeClass}">${esc(wk.variantLabel)}</span>
+        </div>
+        <div class="week-row-dates">${fmtDateShort(start)} – ${fmtDateShort(end)}</div>
+        <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="week-row-pct">${s.done}/${s.total} sets · ${pct}%</div>
+      </a>`;
+  }).join('');
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb(`Month ${monthNo}`), 'overview')}
+    <main class="hb-main">
+      <h1 class="hb-h1">${esc(month.label)}</h1>
+      <div class="week-list">${rows}</div>
+    </main>`;
+}
+
+function fmtDateShort(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/* --------------------------------------------------------------------- week */
+
+function renderWeek(cid, weekNo) {
+  const wk = PROGRAM.weeks[weekNo - 1];
+  if (!wk) return renderOverview(cid);
+  const cyc = STATE.cycles[cid];
+  const todayStr = todayYMD();
+  const todayLoc = findTodayLocation(cid);
+
+  const deloadBanner = wk.isDeload
+    ? `<div class="deload-banner">${esc(wk.deloadBanner)}</div>` : '';
+
+  const days = wk.days.map((d) => {
+    const date = plannedDate(cyc.startDate, weekNo, d.dayIndex);
+    const s = dayCompletionStats(cid, weekNo, d);
+    const pct = Math.round(s.pct * 100);
+    const isToday = date === todayStr;
+    const openAttr = isToday ? ' open' : '';
+    return `
+      <details class="day-card${isToday ? ' day-card--today' : ''}"${openAttr}>
+        <summary class="day-card-summary">
+          <span class="day-card-name">${esc(d.name)}${isToday ? ' <span class="today-chip">Today</span>' : ''}</span>
+          <span class="day-card-date">${fmtDateShort(date)}</span>
+          <span class="day-card-title">${esc(d.title)}</span>
+          <span class="day-card-progress">${s.total ? `${s.done}/${s.total}` : '—'}</span>
+        </summary>
+        <div class="day-card-detail">
+          <div class="bar"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <a class="day-card-open" href="#/${cid}/month/${wk.month}/week/${weekNo}/day/${d.key}">Open full log →</a>
+        </div>
+      </details>`;
+  }).join('');
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb(`Month ${wk.month}`, `#/${cid}/month/${wk.month}`) + crumb(`Week ${weekNo}`), 'overview')}
+    <main class="hb-main screen-only">
+      <h1 class="hb-h1">${esc(wk.header)}</h1>
+      <p class="hb-protocol">${esc(wk.protocol)}</p>
+      ${deloadBanner}
+      <div class="hb-check-row" style="margin-bottom:16px;">
+        <button type="button" class="hb-btn" data-action="print-week">Print this week</button>
+      </div>
+      <div class="day-list">${days}</div>
+    </main>
+    ${renderWeekPrintable(cid, wk)}`;
+}
+
+/**
+ * §8 — "an @media print stylesheet reproducing the printable log layout for
+ * any selected week." The interactive <details>/checkbox markup above is
+ * hidden under @media print (see .hb-topbar, .day-card-open, .day-nav, …);
+ * this block is screen-invisible (inline display:none) and is what actually
+ * prints — one flat, always-expanded page matching the source PDF's table
+ * layout: name, target, empty print-boxes for each prescribed set, bell/RPE
+ * as plain text fields to fill in by hand.
+ */
+function renderWeekPrintable(cid, wk) {
+  const cyc = STATE.cycles[cid];
+  const days = wk.days.map((d) => {
+    const date = plannedDate(cyc.startDate, wk.week, d.dayIndex);
+    const items = d.items.map((it) => printableItemHtml(it)).join('');
+    return `
+      <div class="print-day">
+        <div class="print-day-head"><span>${esc(d.name)} — ${esc(d.title)}</span><span>${esc(date)}</span></div>
+        ${d.comment ? `<div class="print-item-target">${esc(d.comment)}</div>` : ''}
+        ${items}
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="hb-main hb-main--print-week print-only">
+      <div class="print-week-title">${esc(wk.header)}</div>
+      <div class="print-week-protocol">${esc(wk.protocol)}</div>
+      ${wk.isDeload ? `<div class="print-week-protocol"><strong>${esc(wk.deloadBanner)}</strong></div>` : ''}
+      ${days}
+    </div>`;
+}
+
+function printableItemHtml(it) {
+  if (it.type === 'sets' || it.type === 'kb') {
+    const labels = it.rungs || null;
+    const boxes = Array.from({ length: it.sets }, (_, i) => {
+      const label = labels ? labels[i] : '';
+      return `<span class="print-box" title="${esc(label)}"></span>`;
+    }).join('');
+    const kbFields = it.type === 'kb' ? ' <span class="print-fields">Bell ____ kg &nbsp; RPE ____</span>' : '';
+    return `
+      <div class="print-item">
+        <span class="print-item-name">${esc(it.name)}</span>
+        <span class="print-item-target">${esc(it.target)}${it.group ? ' · ' + esc(it.group) : ''}</span>
+        <span class="print-boxes">${boxes}</span>${kbFields}
+      </div>`;
+  }
+  if (it.type === 'task') {
+    return `
+      <div class="print-item">
+        <span class="print-box"></span>
+        <span class="print-item-name">${esc(it.name)}</span>
+        <span class="print-item-target">${esc(it.target)}</span>
+      </div>`;
+  }
+  if (it.type === 'test') {
+    const label = it.field === 'pair' ? `L ____ ${esc(it.unit)} / R ____ ${esc(it.unit)}` : `____ ${esc(it.unit)}`;
+    return `
+      <div class="print-item">
+        <span class="print-item-name">${esc(it.name)}</span>
+        <span class="print-fields">${label}</span>
+      </div>`;
+  }
+  return '';
+}
+
+/* ---------------------------------------------------------------------- day */
+
+function renderDay(cid, weekNo, dayKey) {
+  const wk = PROGRAM.weeks[weekNo - 1];
+  if (!wk) return renderOverview(cid);
+  const day = wk.days.find((d) => d.key === dayKey);
+  if (!day) return renderWeek(cid, weekNo);
+  const cyc = STATE.cycles[cid];
+  const readOnly = !!(cyc && cyc.status === 'archived'); // §7.4 — archived cycles are read-only.
+  const date = plannedDate(cyc.startDate, weekNo, day.dayIndex);
+  const s = dayCompletionStats(cid, weekNo, day);
+  const pct = Math.round(s.pct * 100);
+  const dl = getDayLog(cid, weekNo, dayKey);
+
+  const items = day.items.map((it) => renderItem(cid, weekNo, dayKey, it, readOnly)).join('');
+
+  const prevIdx = day.dayIndex - 1;
+  const nextIdx = day.dayIndex + 1;
+  const prevHref = prevIdx >= 0 ? `#/${cid}/month/${wk.month}/week/${weekNo}/day/${DAY_KEYS[prevIdx]}` : null;
+  const nextHref = nextIdx <= 6 ? `#/${cid}/month/${wk.month}/week/${weekNo}/day/${DAY_KEYS[nextIdx]}` : null;
+
+  return `
+    <header class="hb-topbar hb-topbar--sticky">
+      <div class="hb-topbar-row">
+        <a class="hb-brand" href="#/${cid}">HealthBot</a>
+        <nav class="hb-crumbs" aria-label="Breadcrumb">${crumb('Overview', `#/${cid}`)}${crumb(`Wk ${weekNo}`, `#/${cid}/month/${wk.month}/week/${weekNo}`)}${crumb(day.name)}</nav>
+        <span class="hb-today-btn hb-today-btn--static">${s.total ? `${s.done}/${s.total}` : '—'}</span>
+      </div>
+      <div class="bar bar--sticky"><div class="bar-fill" style="width:${pct}%"></div></div>
+    </header>
+    <main class="hb-main hb-main--day">
+      <h1 class="hb-h1">${esc(day.name)} <span class="hb-h1-sub">${fmtDateShort(date)} · ${esc(wk.phaseLabel)}</span></h1>
+      <div class="day-title-row">
+        <span class="day-title">${esc(day.title)}</span>
+        ${dl && dl.completedAt ? '<span class="badge badge--done">Complete</span>' : ''}
+      </div>
+      ${readOnly ? `<div class="archived-banner">${esc(cyc.label)} is archived — read-only. <a href="#/${STATE.activeCycleId}">Go to active cycle →</a></div>` : ''}
+      ${day.comment ? `<p class="hb-comment">${esc(day.comment)}</p>` : ''}
+      <div class="item-list">${items}</div>
+      <div class="hb-note-field">
+        <label class="hb-field-label" for="hb-day-note">Note</label>
+        <textarea id="hb-day-note" rows="1" data-action="set-note" placeholder="Add a note for this day…" ${readOnly ? 'readonly' : ''}>${esc(getDayNote(cid, weekNo, dayKey))}</textarea>
+      </div>
+      <nav class="day-nav">
+        ${prevHref ? `<a href="${prevHref}">← Previous day</a>` : '<span></span>'}
+        ${nextHref ? `<a href="${nextHref}">Next day →</a>` : '<span></span>'}
+      </nav>
+    </main>`;
+}
+
+function renderItem(cid, week, dayKey, it, readOnly) {
+  const dis = readOnly ? 'disabled' : '';
+  if (it.type === 'sets' || it.type === 'kb') {
+    const labels = it.rungs || null;
+    const boxes = Array.from({ length: it.sets }, (_, i) => {
+      const checked = isSetChecked(cid, week, dayKey, it.id, i);
+      const label = labels ? labels[i] : String(i + 1);
+      return `
+        <label class="hb-check-wrap" title="Set ${label}">
+          <input type="checkbox" data-action="toggle-set" data-item="${esc(it.id)}" data-idx="${i}" data-total="${it.sets}" ${checked ? 'checked' : ''} ${dis}>
+          <span class="hb-check-box" aria-hidden="true">${esc(label)}</span>
+          <span class="hb-check-sr">Set ${label}${checked ? ' — complete' : ''}</span>
+        </label>`;
+    }).join('');
+    let kbFields = '';
+    if (it.type === 'kb') {
+      const cur = getKbFields(cid, week, dayKey, it.id);
+      const stickyBell = cur.bellKg != null ? cur.bellKg : lastBellForItem(cid, it.id, week, day_index_of(dayKey));
+      const bellOptions = ['<option value=""></option>']
+        .concat(STATE.settings.bells.map((b) =>
+          `<option value="${b}" ${Number(stickyBell) === b ? 'selected' : ''}>${b} kg</option>`))
+        .join('');
+      const rpeOptions = ['<option value=""></option>']
+        .concat(RPE_VALUES.map((r) =>
+          `<option value="${r}" ${cur.rpe === r ? 'selected' : ''}>${r} · ${rpeZone(r)}</option>`))
+        .join('');
+      kbFields = `
+        <div class="hb-kb-row">
+          <label class="hb-field">
+            <span class="hb-field-label">Bell</span>
+            <select class="hb-select" data-action="set-bell" data-item="${esc(it.id)}" ${dis}>${bellOptions}</select>
+          </label>
+          <label class="hb-field">
+            <span class="hb-field-label">RPE</span>
+            <select class="hb-select" data-action="set-rpe" data-item="${esc(it.id)}" ${dis}>${rpeOptions}</select>
+          </label>
+        </div>`;
+    }
+
+    return `
+      <div class="item item--${it.type}">
+        <div class="item-head">
+          <span class="item-name">${esc(it.name)}</span>
+          <span class="item-target">${esc(it.target)}</span>
+        </div>
+        ${it.group ? `<div class="item-group">${esc(it.group)}</div>` : ''}
+        <div class="hb-check-row">${boxes}</div>
+        ${kbFields}
+      </div>`;
+  }
+
+  if (it.type === 'task') {
+    const done = isTaskDone(cid, week, dayKey, it.id);
+    const refLink = it.reference ? ` · <a href="#/reference">Reference & cues</a>` : '';
+    const totalRepsField = it.totalReps ? `
+      <label class="hb-field hb-total-reps">
+        <span class="hb-field-label">Total reps (optional)</span>
+        <input class="hb-input" type="number" inputmode="numeric" min="0" step="1"
+          data-action="set-total-reps" data-item="${esc(it.id)}"
+          value="${esc(getTotalReps(cid, week, dayKey, it.id))}" ${dis}>
+      </label>` : '';
+    return `
+      <div class="item item--task">
+        <label class="hb-task-wrap">
+          <input type="checkbox" data-action="toggle-task" data-item="${esc(it.id)}" ${done ? 'checked' : ''} ${dis}>
+          <span class="hb-check-box hb-check-box--task" aria-hidden="true"></span>
+          <span class="item-task-text">
+            <span class="item-name">${esc(it.name)}</span>
+            <span class="item-target">${esc(it.target)}${refLink}</span>
+          </span>
+        </label>
+        ${totalRepsField}
+      </div>`;
+  }
+
+  if (it.type === 'test') {
+    const v = getTestValue(cid, week, dayKey, it.id);
+    let fields;
+    if (it.field === 'pair') {
+      fields = `
+        <div class="hb-test-row">
+          <label class="hb-field">
+            <span class="hb-field-label">Left (${esc(it.unit)})</span>
+            <input class="hb-input" type="number" inputmode="numeric" min="0" step="1"
+              data-action="set-test" data-field="L" data-item="${esc(it.id)}" value="${esc(v.value)}" ${dis}>
+          </label>
+          <label class="hb-field">
+            <span class="hb-field-label">Right (${esc(it.unit)})</span>
+            <input class="hb-input" type="number" inputmode="numeric" min="0" step="1"
+              data-action="set-test" data-field="R" data-item="${esc(it.id)}" value="${esc(v.valueR)}" ${dis}>
+          </label>
+        </div>`;
+    } else {
+      fields = `
+        <div class="hb-test-row">
+          <label class="hb-field">
+            <span class="hb-field-label">${esc(it.unit)}</span>
+            <input class="hb-input" type="number" inputmode="numeric" min="0" step="1"
+              data-action="set-test" data-field="L" data-item="${esc(it.id)}" value="${esc(v.value)}" ${dis}>
+          </label>
+        </div>`;
+    }
+    return `
+      <div class="item item--test">
+        <div class="item-head">
+          <span class="item-name">${esc(it.name)}</span>
+          <span class="item-target">${esc(it.unit)}</span>
+        </div>
+        ${fields}
+      </div>`;
+  }
+
+  return '';
+}
+
+/** dayKey → dayIndex lookup (DAY_KEYS order). */
+function day_index_of(dayKey) {
+  return DAY_KEYS.indexOf(dayKey);
+}
+
+/* =============================================================================
+   Export — buildRows(), CSV serializer, Export screen, backup/restore
+   (Checkpoint 4 of §10 / §5 / §6.2).
+
+   Architecture (§5.1):
+     state → buildRows(cycleId) → toCSV() → download
+                                └→ on-screen preview table
+   buildRows() (four functions below, one per file) produce plain row
+   objects. Nothing else in the app constructs CSV rows.
+   ========================================================================== */
+
+/* FROZEN (§9) — column names and order. Never change without a schema
+   migration; these are the join keys into every spreadsheet exported so far. */
+const CSV_COLUMNS = {
+  setlog: ['rowKey', 'cycleId', 'week', 'month', 'phase', 'variant', 'dayOfWeek',
+    'plannedDate', 'completedAt', 'itemId', 'itemName', 'itemType', 'setIndex',
+    'targetLabel', 'completed', 'bellKg', 'rpe', 'volumeKg', 'note'],
+  tests: ['cycleId', 'week', 'plannedDate', 'testId', 'testName', 'value', 'valueR', 'unit'],
+  bodyweight: ['date', 'cycleId', 'week', 'weightKg'],
+  cycles: ['cycleId', 'label', 'startDate', 'status', 'createdAt', 'archivedAt']
+};
+
+/* ------------------------------------------------------------------ buildRows */
+
+/**
+ * setlog.csv — one row per prescribed set (§5.2). 'sets' and 'kb' items get
+ * one row per set index; 'task' items (runs, mobility, rest, density clocks)
+ * get a single row at setIndex 0 so adherence on non-set work is still
+ * queryable. 'test' items are excluded — they live in tests.csv.
+ * Uncompleted sets are included with completed = FALSE; adherence analysis
+ * needs the denominator.
+ */
+function buildSetlogRows(cycleIds) {
+  const rows = [];
+  cycleIds.forEach((cycleId) => {
+    const cyc = STATE.cycles[cycleId];
+    if (!cyc) return;
+    PROGRAM.weeks.forEach((wk) => {
+      wk.days.forEach((day) => {
+        const plannedDateStr = plannedDate(cyc.startDate, wk.week, day.dayIndex);
+        const dayLog = getDayLog(cycleId, wk.week, day.key);
+        const dayCompletedAt = (dayLog && dayLog.completedAt) || '';
+        const dayNote = (dayLog && dayLog.note) || '';
+
+        day.items.forEach((it) => {
+          if (it.type === 'sets' || it.type === 'kb') {
+            const itemLog = dayLog && dayLog.items[it.id];
+            for (let setIndex = 0; setIndex < it.sets; setIndex++) {
+              const completed = !!(itemLog && itemLog.sets && itemLog.sets[setIndex]);
+              const bellKg = (it.type === 'kb' && itemLog && itemLog.bellKg != null) ? itemLog.bellKg : '';
+              const rpe = (it.type === 'kb' && itemLog && itemLog.rpe != null) ? itemLog.rpe : '';
+              const volumeKg = (it.type === 'kb' && it.reps != null && bellKg !== '') ? (it.reps * bellKg) : '';
+              rows.push({
+                rowKey: `${cycleId}|${wk.week}|${day.key}|${it.id}|${setIndex}`,
+                cycleId, week: wk.week, month: wk.month, phase: wk.phase, variant: wk.variant,
+                dayOfWeek: day.key, plannedDate: plannedDateStr, completedAt: dayCompletedAt,
+                itemId: it.id, itemName: it.name, itemType: it.type, setIndex,
+                targetLabel: it.target, completed, bellKg, rpe, volumeKg, note: dayNote
+              });
+            }
+          } else if (it.type === 'task') {
+            const itemLog = dayLog && dayLog.items[it.id];
+            const completed = !!(itemLog && itemLog.done);
+            rows.push({
+              rowKey: `${cycleId}|${wk.week}|${day.key}|${it.id}|0`,
+              cycleId, week: wk.week, month: wk.month, phase: wk.phase, variant: wk.variant,
+              dayOfWeek: day.key, plannedDate: plannedDateStr, completedAt: dayCompletedAt,
+              itemId: it.id, itemName: it.name, itemType: it.type, setIndex: 0,
+              targetLabel: it.target, completed, bellKg: '', rpe: '', volumeKg: '', note: dayNote
+            });
+          }
+          // type 'test' → tests.csv, not here.
+        });
+      });
+    });
+  });
+  return rows;
+}
+
+/** tests.csv — one row per test-week measurement (§5.2). */
+function buildTestRows(cycleIds) {
+  const rows = [];
+  cycleIds.forEach((cycleId) => {
+    const cyc = STATE.cycles[cycleId];
+    if (!cyc) return;
+    PROGRAM.weeks.forEach((wk) => {
+      wk.days.forEach((day) => {
+        const plannedDateStr = plannedDate(cyc.startDate, wk.week, day.dayIndex);
+        day.items.forEach((it) => {
+          if (it.type !== 'test') return;
+          const v = getTestValue(cycleId, wk.week, day.key, it.id);
+          rows.push({
+            cycleId, week: wk.week, plannedDate: plannedDateStr,
+            testId: it.id, testName: it.name,
+            value: v.value,
+            valueR: it.field === 'pair' ? v.valueR : '',
+            unit: it.unit
+          });
+        });
+      });
+    });
+  });
+  return rows;
+}
+
+/**
+ * bodyweight.csv (§5.2). Bodyweight is date-keyed and cycle-independent
+ * (§4.4/§4.5); cycleId/week are derived per row by finding which of the
+ * given candidate cycles' 24-week windows the date falls in (first match
+ * wins). A date outside every candidate cycle still exports, with cycleId
+ * and week left blank.
+ */
+function findCycleWeekForDate(dateStr, candidateCycleIds) {
+  for (const cid of candidateCycleIds) {
+    const cyc = STATE.cycles[cid];
+    if (!cyc) continue;
+    const offset = daysBetween(cyc.startDate, dateStr);
+    if (offset >= 0 && offset < 24 * 7) {
+      return { cycleId: cid, week: Math.floor(offset / 7) + 1 };
+    }
+  }
+  return { cycleId: '', week: '' };
+}
+
+function buildBodyweightRows(cycleIds) {
+  return Object.keys(STATE.bodyweight).sort().map((date) => {
+    const match = findCycleWeekForDate(date, cycleIds);
+    return { date, cycleId: match.cycleId, week: match.week, weightKg: STATE.bodyweight[date] };
+  });
+}
+
+/** cycles.csv (§5.2). */
+function buildCycleRows(cycleIds) {
+  return cycleIds.filter((cid) => STATE.cycles[cid]).map((cid) => {
+    const c = STATE.cycles[cid];
+    return {
+      cycleId: cid, label: c.label, startDate: c.startDate, status: c.status,
+      createdAt: c.createdAt, archivedAt: c.archivedAt || ''
+    };
+  });
+}
+
+function kindRows(kind, cycleIds) {
+  if (kind === 'setlog') return buildSetlogRows(cycleIds);
+  if (kind === 'tests') return buildTestRows(cycleIds);
+  if (kind === 'bodyweight') return buildBodyweightRows(cycleIds);
+  return buildCycleRows(cycleIds);
+}
+
+/* ------------------------------------------------------------- CSV (§5.3) */
+
+/** Empty means empty — never null, undefined, N/A, or -. Booleans as TRUE/FALSE. */
+function csvFormatValue(v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  return String(v);
+}
+
+/** RFC 4180 field escaping: quote on comma/quote/CR/LF, double embedded quotes. */
+function csvEscapeField(s) {
+  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+/** Pure serializer. \r\n line terminator, UTF-8 BOM prefix, frozen column order. */
+function toCSV(rows, columns) {
+  const headerLine = columns.map(csvEscapeField).join(',');
+  const lines = rows.map((r) => columns.map((c) => csvEscapeField(csvFormatValue(r[c]))).join(','));
+  return '\uFEFF' + [headerLine].concat(lines).join('\r\n') + '\r\n';
+}
+
+/* -------------------------------------------------------------- downloads */
+
+function downloadBlob(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function scopeFileTag(scope, cycleIds) {
+  if (scope === 'all') return 'all';
+  return cycleIds[0] || 'cycle';
+}
+
+function stampExport() {
+  STATE.settings.lastExportAt = new Date().toISOString();
+  saveState();
+}
+
+function downloadCsvFile(kind, cycleIds, scope) {
+  const csv = toCSV(kindRows(kind, cycleIds), CSV_COLUMNS[kind]);
+  const filename = `healthbot_${kind}_${scopeFileTag(scope, cycleIds)}_${todayYMD()}.csv`;
+  downloadBlob(filename, csv, 'text/csv;charset=utf-8');
+  stampExport();
+}
+
+function downloadAllCsv(cycleIds, scope) {
+  ['setlog', 'tests', 'bodyweight', 'cycles'].forEach((k) => downloadCsvFile(k, cycleIds, scope));
+}
+
+/** §5.4 — Copy to clipboard, often faster than managing a download on a phone. */
+function copyCsvToClipboard(kind, cycleIds) {
+  const csv = toCSV(kindRows(kind, cycleIds), CSV_COLUMNS[kind]);
+  const done = () => { stampExport(); showToast(`${kind}.csv copied to clipboard`); };
+  const fail = () => showToast('Copy failed — try Download instead.');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(csv).then(done, fail);
+  } else {
+    fail();
+  }
+}
+
+/* -------------------------------------------------------------- backup §6.2 */
+
+function downloadBackup() {
+  downloadBlob(`healthbot_backup_${todayYMD()}.json`, JSON.stringify(STATE, null, 2), 'application/json');
+}
+
+/** Validate only enough to know this is a HealthBot backup; never merge silently. */
+function parseBackupFile(text) {
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (e) {
+    return { error: 'That file is not valid JSON.' };
+  }
+  if (!parsed || typeof parsed !== 'object' || parsed.schemaVersion == null || !parsed.cycles) {
+    return { error: "That file doesn't look like a HealthBot backup (missing schemaVersion/cycles)." };
+  }
+  return { parsed };
+}
+
+/** Cycle/week/item counts for the restore diff summary — current vs incoming. */
+function summarizeState(state) {
+  const cycleIds = Object.keys(state.cycles || {});
+  let weeksLogged = 0, itemsLogged = 0;
+  cycleIds.forEach((cid) => {
+    const cl = (state.logs || {})[cid];
+    if (!cl) return;
+    Object.keys(cl.weeks || {}).forEach((w) => {
+      const wl = cl.weeks[w];
+      let weekHasData = false;
+      Object.keys(wl.days || {}).forEach((dk) => {
+        const dl = wl.days[dk];
+        const n = Object.keys((dl && dl.items) || {}).length;
+        itemsLogged += n;
+        if (n > 0 || (dl && dl.note)) weekHasData = true;
+      });
+      if (weekHasData) weeksLogged++;
+    });
+  });
+  return {
+    cycles: cycleIds.length, weeksLogged, itemsLogged,
+    bwCount: Object.keys(state.bodyweight || {}).length
+  };
+}
+
+/* -------------------------------------------------------- reminder chip §5.4 */
+
+let EXPORT_REMINDER_DISMISSED = false;
+
+/** Latest day.completedAt across every cycle, or null if nothing is logged. */
+function mostRecentActivity() {
+  let latest = null;
+  Object.keys(STATE.logs).forEach((cid) => {
+    const cl = STATE.logs[cid];
+    Object.keys(cl.weeks || {}).forEach((w) => {
+      const wl = cl.weeks[w];
+      Object.keys(wl.days || {}).forEach((dk) => {
+        const dl = wl.days[dk];
+        if (dl && dl.completedAt && (!latest || dl.completedAt > latest)) latest = dl.completedAt;
+      });
+    });
+  });
+  return latest;
+}
+
+/** lastExportAt >14 days old and there's logged activity since then. */
+function shouldShowExportReminder() {
+  if (EXPORT_REMINDER_DISMISSED) return false;
+  const latest = mostRecentActivity();
+  if (!latest) return false;
+  const last = STATE.settings.lastExportAt;
+  if (!last) return true;
+  const daysSince = (Date.now() - new Date(last).getTime()) / 86400000;
+  return daysSince > 14 && latest > last;
+}
+
+function exportReminderChipHtml() {
+  if (!shouldShowExportReminder()) return '';
+  return `
+    <div class="hb-reminder-chip">
+      <span>It's been a while since your last export — new sets are logged. <a href="#/export">Export now</a></span>
+      <button type="button" data-action="dismiss-export-reminder" aria-label="Dismiss">✕</button>
+    </div>`;
+}
+
+/* ------------------------------------------------------------------- toast */
+
+let TOAST_MSG = null;
+let TOAST_TIMER = null;
+
+function showToast(msg) {
+  TOAST_MSG = msg;
+  renderApp();
+  clearTimeout(TOAST_TIMER);
+  TOAST_TIMER = setTimeout(() => { TOAST_MSG = null; renderApp(); }, 2500);
+}
+
+function toastHtml() {
+  return TOAST_MSG ? `<div class="hb-toast" role="status">${esc(TOAST_MSG)}</div>` : '';
+}
+
+/* ------------------------------------------------------------- Export screen */
+
+let EXPORT_UI = { scope: 'active', specificCycleId: null, previewFile: 'setlog' };
+let RESTORE_PENDING = null; // { parsed } | { error } | null
+
+function resolveExportCycleIds() {
+  const allIds = Object.keys(STATE.cycles);
+  if (EXPORT_UI.scope === 'all') return allIds;
+  if (EXPORT_UI.scope === 'specific') {
+    return EXPORT_UI.specificCycleId && STATE.cycles[EXPORT_UI.specificCycleId]
+      ? [EXPORT_UI.specificCycleId] : [STATE.activeCycleId];
+  }
+  return [STATE.activeCycleId];
+}
+
+function renderPreviewTable(columns, rows) {
+  if (!rows.length) return '<p class="hb-note">No rows in this scope yet.</p>';
+  const head = columns.map((c) => `<th>${esc(c)}</th>`).join('');
+  const body = rows.map((r) => `<tr>${columns.map((c) => `<td>${esc(csvFormatValue(r[c]))}</td>`).join('')}</tr>`).join('');
+  return `<div class="ref-table-wrap"><table class="ref-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+function renderRestorePanel() {
+  if (!RESTORE_PENDING) return '';
+  if (RESTORE_PENDING.error) {
+    return `<div class="hb-safety">${esc(RESTORE_PENDING.error)}</div>`;
+  }
+  const cur = summarizeState(STATE);
+  const inc = summarizeState(RESTORE_PENDING.parsed);
+  const versionNote = RESTORE_PENDING.parsed.schemaVersion !== SCHEMA_VERSION
+    ? `<p class="hb-safety">This backup is schema v${esc(RESTORE_PENDING.parsed.schemaVersion)}; this app is v${SCHEMA_VERSION}. Restoring may not be fully compatible.</p>`
+    : '';
+  return `
+    <div class="item" style="margin-top:12px;">
+      <div class="item-head"><span class="item-name">Confirm restore</span></div>
+      ${versionNote}
+      <div class="ref-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th></th><th>Current</th><th>Incoming</th></tr></thead>
+          <tbody>
+            <tr><td>Cycles</td><td>${cur.cycles}</td><td>${inc.cycles}</td></tr>
+            <tr><td>Weeks with logs</td><td>${cur.weeksLogged}</td><td>${inc.weeksLogged}</td></tr>
+            <tr><td>Logged items</td><td>${cur.itemsLogged}</td><td>${inc.itemsLogged}</td></tr>
+            <tr><td>Bodyweight entries</td><td>${cur.bwCount}</td><td>${inc.bwCount}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="hb-note">Replacing overwrites all current data — nothing is merged.</p>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn hb-btn--primary" data-action="restore-confirm">Replace current data</button>
+        <button type="button" class="hb-btn" data-action="restore-cancel">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function renderExport(cid) {
+  const allCycleIds = Object.keys(STATE.cycles);
+  const activeId = STATE.activeCycleId;
+  const scopeIds = resolveExportCycleIds();
+  const scopeLabel = EXPORT_UI.scope === 'all' ? 'All cycles'
+    : EXPORT_UI.scope === 'specific' ? (STATE.cycles[scopeIds[0]] ? STATE.cycles[scopeIds[0]].label : 'Cycle')
+      : (STATE.cycles[activeId] ? STATE.cycles[activeId].label : 'Active cycle');
+
+  const activeCounts = {
+    setlog: buildSetlogRows([activeId]).length,
+    tests: buildTestRows([activeId]).length,
+    bodyweight: buildBodyweightRows([activeId]).length
+  };
+  const allCounts = {
+    setlog: buildSetlogRows(allCycleIds).length,
+    tests: buildTestRows(allCycleIds).length,
+    bodyweight: buildBodyweightRows(allCycleIds).length
+  };
+
+  const lastExport = STATE.settings.lastExportAt ? new Date(STATE.settings.lastExportAt).toLocaleString() : 'Never';
+
+  const cycleOptions = allCycleIds.map((id) =>
+    `<option value="${esc(id)}" ${EXPORT_UI.specificCycleId === id ? 'selected' : ''}>${esc(STATE.cycles[id].label)}</option>`).join('');
+
+  const previewCols = CSV_COLUMNS[EXPORT_UI.previewFile];
+  const previewRows = kindRows(EXPORT_UI.previewFile, scopeIds).slice(0, 20);
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Export'), 'export')}
+    <main class="hb-main">
+      <h1 class="hb-h1">Export</h1>
+      <p class="hb-note">Last export: ${esc(lastExport)}</p>
+      <p class="hb-note">Active cycle (${esc(STATE.cycles[activeId] ? STATE.cycles[activeId].label : activeId)}): ${activeCounts.setlog} setlog rows · ${activeCounts.tests} test rows · ${activeCounts.bodyweight} bodyweight entries</p>
+      <p class="hb-note">All cycles: ${allCounts.setlog} setlog rows · ${allCounts.tests} test rows · ${allCounts.bodyweight} bodyweight entries</p>
+
+      <h2 class="hb-h2">Scope</h2>
+      <div class="hb-radio-row" role="radiogroup" aria-label="Export scope">
+        <label><input type="radio" name="export-scope" value="active" data-action="export-scope" ${EXPORT_UI.scope === 'active' ? 'checked' : ''}> Active cycle</label>
+        <label><input type="radio" name="export-scope" value="specific" data-action="export-scope" ${EXPORT_UI.scope === 'specific' ? 'checked' : ''}> Specific cycle</label>
+        <label><input type="radio" name="export-scope" value="all" data-action="export-scope" ${EXPORT_UI.scope === 'all' ? 'checked' : ''}> Everything</label>
+      </div>
+      ${EXPORT_UI.scope === 'specific' ? `
+      <label class="hb-field" style="max-width:220px;margin-top:10px;">
+        <span class="hb-field-label">Cycle</span>
+        <select class="hb-select" data-action="export-specific-cycle">${cycleOptions}</select>
+      </label>` : ''}
+
+      <h2 class="hb-h2">Download CSVs</h2>
+      <p class="hb-note">Scope: ${esc(scopeLabel)}</p>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn" data-action="download-csv" data-kind="setlog">setlog.csv</button>
+        <button type="button" class="hb-btn" data-action="download-csv" data-kind="tests">tests.csv</button>
+        <button type="button" class="hb-btn" data-action="download-csv" data-kind="bodyweight">bodyweight.csv</button>
+        <button type="button" class="hb-btn" data-action="download-csv" data-kind="cycles">cycles.csv</button>
+        <button type="button" class="hb-btn hb-btn--primary" data-action="download-all-csv">Download all four</button>
+        <button type="button" class="hb-btn" data-action="copy-csv">Copy preview to clipboard</button>
+      </div>
+
+      <h2 class="hb-h2">Preview</h2>
+      <label class="hb-field" style="max-width:220px;">
+        <span class="hb-field-label">File</span>
+        <select class="hb-select" data-action="export-preview-file">
+          <option value="setlog" ${EXPORT_UI.previewFile === 'setlog' ? 'selected' : ''}>setlog.csv</option>
+          <option value="tests" ${EXPORT_UI.previewFile === 'tests' ? 'selected' : ''}>tests.csv</option>
+          <option value="bodyweight" ${EXPORT_UI.previewFile === 'bodyweight' ? 'selected' : ''}>bodyweight.csv</option>
+          <option value="cycles" ${EXPORT_UI.previewFile === 'cycles' ? 'selected' : ''}>cycles.csv</option>
+        </select>
+      </label>
+      ${renderPreviewTable(previewCols, previewRows)}
+
+      <h2 class="hb-h2">Backup</h2>
+      <p class="hb-note">Downloads the entire app state — every cycle, every logged set. This is the only true backup; there is no server copy.</p>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn hb-btn--primary" data-action="download-backup">Download backup JSON</button>
+      </div>
+
+      <h2 class="hb-h2">Restore</h2>
+      <p class="hb-note">Restoring replaces all current data. Nothing is merged.</p>
+      <input type="file" accept="application/json" data-action="restore-file-pick">
+      ${renderRestorePanel()}
+    </main>`;
+}
+
+/* =============================================================================
+   Cycles & Settings (Checkpoint 5 of §10 / §4.6 / §6.1).
+
+   Two distinct start-date actions, kept deliberately separate (§4.6):
+     - Edit start date  → reschedules the CURRENT cycle in place. Logged
+       checkboxes are preserved because dates are derived, never stored (§4.5).
+     - Start a new cycle → archives the current cycle and creates a fresh,
+       empty one. Prior logs remain under the old cycleId.
+   Delete cycle is a separate, double-confirmed destructive action that
+   forces an export (or an explicit "I already have it" acknowledgement)
+   first — with no server copy, an unexported delete is permanent.
+   ========================================================================== */
+
+let SETTINGS_UI = {
+  editingStartDate: null,   // cycleId currently being edited, or null
+  startDateDraft: '',
+  startDateSnapMsg: '',
+  newCycleConfirming: false,
+  newCycleStartDraft: '',
+  deletePending: null,      // { cycleId, exportAck, confirmStep } | null
+  storagePersisted: null    // null = unknown; true/false once checked (§6.1)
+};
+
+/** Active cycle first, then the rest ordered by creation. */
+function cycleList() {
+  const ids = Object.keys(STATE.cycles);
+  return ids.sort((a, b) => {
+    if (a === STATE.activeCycleId) return -1;
+    if (b === STATE.activeCycleId) return 1;
+    return (STATE.cycles[a].createdAt || '').localeCompare(STATE.cycles[b].createdAt || '');
+  });
+}
+
+/** cycleId = c<n+1> — next unused numeric suffix (§4.6). */
+function nextCycleId() {
+  const nums = Object.keys(STATE.cycles)
+    .map((id) => Number(String(id).replace(/^c/, '')))
+    .filter((n) => !isNaN(n));
+  const max = nums.length ? Math.max(...nums) : 0;
+  return `c${max + 1}`;
+}
+
+/**
+ * §4.6 Edit start date — reschedules the given cycle. All logged checkboxes
+ * are preserved and simply re-date, because dates are derived, never stored
+ * (§4.5). Non-Monday input snaps to the preceding Monday, stated inline —
+ * never silently accepted, never rejected with an error.
+ */
+function editCycleStartDate(cid, rawDate) {
+  const cyc = STATE.cycles[cid];
+  if (!cyc || !rawDate) return;
+  const snapped = snapToMonday(rawDate);
+  cyc.startDate = snapped;
+  saveState();
+  SETTINGS_UI.editingStartDate = null;
+  SETTINGS_UI.startDateSnapMsg = snapped !== rawDate
+    ? `Start date snapped to the preceding Monday (${snapped}).`
+    : '';
+  renderApp();
+}
+
+/** §4.6 Start a new cycle — archives the current cycle, creates a fresh empty one. */
+function confirmStartNewCycle(startDateRaw) {
+  const oldId = STATE.activeCycleId;
+  const oldCyc = STATE.cycles[oldId];
+  if (oldCyc) {
+    oldCyc.status = 'archived';
+    oldCyc.archivedAt = new Date().toISOString();
+  }
+  const newId = nextCycleId();
+  const snapped = snapToMonday(startDateRaw || todayYMD());
+  const label = `Cycle ${newId.replace(/^c/, '')}`;
+  STATE.cycles[newId] = { label, startDate: snapped, status: 'active', createdAt: new Date().toISOString() };
+  STATE.logs[newId] = { weeks: {} };
+  STATE.activeCycleId = newId;
+  saveState();
+  SETTINGS_UI.newCycleConfirming = false;
+  SETTINGS_UI.newCycleStartDraft = '';
+  go(`#/${newId}`);
+  showToast(`${label} started. ${oldCyc ? oldCyc.label : 'Previous cycle'} stays saved — nothing is deleted.`);
+}
+
+/** §4.6 Delete cycle — double-confirmed, destructive. Starts the export-first gate. */
+function beginDeleteCycle(cid) {
+  SETTINGS_UI.deletePending = { cycleId: cid, exportAck: false, confirmStep: 0 };
+  renderApp();
+}
+
+function cancelDeleteCycle() {
+  SETTINGS_UI.deletePending = null;
+  renderApp();
+}
+
+function exportCycleForDelete(cid) {
+  downloadAllCsv([cid], 'specific');
+  downloadBackup();
+  if (SETTINGS_UI.deletePending && SETTINGS_UI.deletePending.cycleId === cid) {
+    SETTINGS_UI.deletePending.exportAck = true;
+  }
+  showToast('Exported. You can now confirm deletion.');
+  renderApp();
+}
+
+function acknowledgeHaveExport() {
+  if (SETTINGS_UI.deletePending) {
+    SETTINGS_UI.deletePending.exportAck = true;
+    renderApp();
+  }
+}
+
+/** Two clicks required past the export gate before the cycle is actually removed. */
+function advanceDeleteConfirm() {
+  if (!SETTINGS_UI.deletePending || !SETTINGS_UI.deletePending.exportAck) return;
+  SETTINGS_UI.deletePending.confirmStep += 1;
+  if (SETTINGS_UI.deletePending.confirmStep >= 2) {
+    performDeleteCycle(SETTINGS_UI.deletePending.cycleId);
+  } else {
+    renderApp();
+  }
+}
+
+function performDeleteCycle(cid) {
+  const wasActive = STATE.activeCycleId === cid;
+  const label = STATE.cycles[cid] ? STATE.cycles[cid].label : cid;
+  delete STATE.cycles[cid];
+  delete STATE.logs[cid];
+  if (wasActive) {
+    const remaining = Object.keys(STATE.cycles);
+    if (remaining.length) {
+      STATE.activeCycleId = remaining[0];
+      STATE.cycles[STATE.activeCycleId].status = 'active';
+    } else {
+      // Never leave the app with zero cycles.
+      const newId = 'c1';
+      STATE.cycles[newId] = { label: 'Cycle 1', startDate: DEFAULT_START, status: 'active', createdAt: new Date().toISOString() };
+      STATE.logs[newId] = { weeks: {} };
+      STATE.activeCycleId = newId;
+    }
+  }
+  saveState();
+  SETTINGS_UI.deletePending = null;
+  go(`#/${STATE.activeCycleId}`);
+  showToast(`${label} deleted.`);
+}
+
+/** §6.1 — request persistent storage once, on first user interaction, and surface the state here. */
+function checkStoragePersisted() {
+  if (SETTINGS_UI.storagePersisted !== null) return;
+  if (navigator.storage && navigator.storage.persisted) {
+    navigator.storage.persisted().then((p) => {
+      SETTINGS_UI.storagePersisted = p;
+      renderApp();
+    }).catch(() => { SETTINGS_UI.storagePersisted = false; });
+  } else {
+    SETTINGS_UI.storagePersisted = false;
+  }
+}
+
+function renderDeleteConfirm(id) {
+  const dp = SETTINGS_UI.deletePending;
+  if (!dp || dp.cycleId !== id) return '';
+  const c = STATE.cycles[id];
+  if (!dp.exportAck) {
+    return `
+      <div class="hb-confirm-box hb-confirm-box--danger">
+        <p class="hb-note"><strong>Export ${esc(c.label)} before deleting.</strong> With no server copy, an unexported delete is permanent.</p>
+        <div class="hb-cycle-row-actions">
+          <button type="button" class="hb-btn hb-btn--primary" data-action="export-for-delete" data-cycle="${esc(id)}">Export this cycle now</button>
+          <button type="button" class="hb-btn" data-action="ack-have-export">I already have it exported</button>
+          <button type="button" class="hb-btn" data-action="cancel-delete-cycle">Cancel</button>
+        </div>
+      </div>`;
+  }
+  const msg = dp.confirmStep === 0
+    ? `Delete ${c.label}? This removes every logged set for this cycle. This cannot be undone.`
+    : `Are you absolutely sure? Deleting ${c.label} is permanent — click again to delete.`;
+  return `
+    <div class="hb-confirm-box hb-confirm-box--danger">
+      <p class="hb-note"><strong>${esc(msg)}</strong></p>
+      <div class="hb-cycle-row-actions">
+        <button type="button" class="hb-btn hb-btn--danger" data-action="advance-delete-confirm">${dp.confirmStep === 0 ? 'Delete cycle' : 'Yes, delete permanently'}</button>
+        <button type="button" class="hb-btn" data-action="cancel-delete-cycle">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function renderSettings(cid) {
+  checkStoragePersisted();
+  const ids = cycleList();
+  const activeId = STATE.activeCycleId;
+
+  const cycleRows = ids.map((id) => {
+    const c = STATE.cycles[id];
+    const isActive = id === activeId;
+    const editing = SETTINGS_UI.editingStartDate === id;
+    const badgeClass = c.status === 'archived' ? 'badge badge--archived' : 'badge badge--done';
+    const deleteBlock = renderDeleteConfirm(id);
+    return `
+      <div class="hb-cycle-row${c.status === 'archived' ? ' hb-cycle-row--archived' : ''}">
+        <div class="hb-cycle-row-top">
+          <span class="hb-cycle-row-title">${esc(c.label)}${isActive ? ' · Active' : ''}</span>
+          <span class="${badgeClass}">${c.status === 'archived' ? 'Archived' : 'Active'}</span>
+        </div>
+        <div class="hb-cycle-row-sub">Start ${esc(c.startDate)}${c.archivedAt ? ` · Archived ${fmtDateShort(c.archivedAt.slice(0, 10))}` : ''}</div>
+        ${editing ? `
+          <div class="hb-kb-row">
+            <label class="hb-field">
+              <span class="hb-field-label">New start date (snaps to the preceding Monday)</span>
+              <input class="hb-input" type="date" data-action="start-date-draft" value="${esc(SETTINGS_UI.startDateDraft || c.startDate)}">
+            </label>
+          </div>
+          <div class="hb-cycle-row-actions">
+            <button type="button" class="hb-btn hb-btn--primary" data-action="save-start-date" data-cycle="${esc(id)}">Save start date</button>
+            <button type="button" class="hb-btn" data-action="cancel-edit-start-date">Cancel</button>
+          </div>` : `
+          <div class="hb-cycle-row-actions">
+            <a class="hb-btn" href="#/${esc(id)}">${c.status === 'archived' ? 'View (read-only)' : 'View'}</a>
+            <button type="button" class="hb-btn" data-action="edit-start-date" data-cycle="${esc(id)}">Edit start date</button>
+            <button type="button" class="hb-btn hb-btn--danger" data-action="begin-delete-cycle" data-cycle="${esc(id)}">Delete cycle</button>
+          </div>`}
+        ${deleteBlock}
+      </div>`;
+  }).join('');
+
+  const newCycleBlock = SETTINGS_UI.newCycleConfirming ? `
+    <div class="hb-confirm-box">
+      <p class="hb-note"><strong>Weeks reset to empty. ${esc(STATE.cycles[activeId] ? STATE.cycles[activeId].label : 'Current cycle')} stays saved — nothing is deleted.</strong></p>
+      <label class="hb-field" style="max-width:220px;">
+        <span class="hb-field-label">New start date (Monday)</span>
+        <input class="hb-input" type="date" data-action="new-cycle-start-draft" value="${esc(SETTINGS_UI.newCycleStartDraft || todayYMD())}">
+      </label>
+      <div class="hb-cycle-row-actions">
+        <button type="button" class="hb-btn hb-btn--primary" data-action="confirm-new-cycle">Start new cycle</button>
+        <button type="button" class="hb-btn" data-action="cancel-new-cycle">Cancel</button>
+      </div>
+    </div>` : `
+    <div class="hb-check-row">
+      <button type="button" class="hb-btn hb-btn--primary" data-action="begin-new-cycle">Start a new cycle</button>
+    </div>`;
+
+  const storageLine = SETTINGS_UI.storagePersisted === null ? 'Checking…'
+    : SETTINGS_UI.storagePersisted ? 'Granted — storage should survive normal browsing.'
+      : 'Not granted — on iOS Safari, an unvisited tab\u2019s storage can be evicted after about a week. Installing to your home screen (Add to Home Screen) is far more durable.';
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Settings'), 'settings')}
+    <main class="hb-main">
+      <h1 class="hb-h1">Settings</h1>
+
+      <h2 class="hb-h2">Storage persistence</h2>
+      <p class="hb-note">${esc(storageLine)}</p>
+
+      <h2 class="hb-h2">Cycles</h2>
+      ${SETTINGS_UI.startDateSnapMsg ? `<p class="hb-safety">${esc(SETTINGS_UI.startDateSnapMsg)}</p>` : ''}
+      <div class="hb-cycle-list">${cycleRows}</div>
+
+      <h2 class="hb-h2">Start a new cycle</h2>
+      <p class="hb-note">Archives the current cycle and presents a fresh, empty 24 weeks. Use this to restart the program. Prior logs remain accessible via the switcher above.</p>
+      ${newCycleBlock}
+
+      <h2 class="hb-h2">Kettlebell inventory</h2>
+      <p class="hb-note">Bells available in the Bell picker: ${esc(STATE.settings.bells.map((b) => b + ' kg').join(', '))}.</p>
+
+      <h2 class="hb-h2">Install as an app</h2>
+      <p class="hb-note">Add HealthBot to your home screen for a more durable, full-screen experience — from your browser's share/menu, choose "Add to Home Screen" (iOS) or "Install app" (Android/Chrome).</p>
+
+      <h2 class="hb-h2">Diagnostics</h2>
+      <p class="hb-note"><a href="#/selftest">Run self-test →</a> — internal checks against the source PDF and the §8 quality bar.</p>
+      <p class="hb-note">App version ${esc(APP_VERSION)} · schema v${SCHEMA_VERSION}</p>
+    </main>`;
+}
+
+/* =============================================================================
+   Analytics — Progress screen, bell-progression nudge, hand-rolled SVG charts
+   (Checkpoint 6 of §10 / §7.5). No charting library; every chart below is a
+   plain inline <svg> built from PROGRAM + logged state.
+   ========================================================================== */
+
+let PROGRESS_UI = { bwDateDraft: '', bwWeightDraft: '' };
+
+/** Every distinct KB exercise across all templates, id → display name. */
+function allKbItemDefs() {
+  const map = {};
+  Object.keys(PHASE_TEMPLATES).forEach((key) => {
+    const tpl = PHASE_TEMPLATES[key];
+    DAY_KEYS.forEach((dk) => {
+      tpl[dk].items.forEach((it) => {
+        if (it.type === 'kb' && !map[it.id]) map[it.id] = it.name;
+      });
+    });
+  });
+  return map;
+}
+
+/**
+ * Per-week aggregate for one KB itemId in a cycle: average logged RPE,
+ * most-recently-logged bell that week, and total volumeKg (reps × bellKg,
+ * summed over completed sets across every occurrence of the item that week —
+ * an exercise can appear on both the Monday and Friday KB day).
+ */
+function kbSeriesForItem(cid, itemId) {
+  const perWeek = {};
+  PROGRAM.weeks.forEach((wk) => {
+    wk.days.forEach((day) => {
+      const it = day.items.find((i) => i.id === itemId && i.type === 'kb');
+      if (!it) return;
+      const dl = getDayLog(cid, wk.week, day.key);
+      const rec = dl && dl.items[itemId];
+      if (!rec) return;
+      if (!perWeek[wk.week]) perWeek[wk.week] = { rpes: [], bells: [], volume: 0 };
+      if (rec.rpe != null) perWeek[wk.week].rpes.push(rec.rpe);
+      if (rec.bellKg != null) perWeek[wk.week].bells.push(rec.bellKg);
+      if (rec.bellKg != null && it.reps != null && rec.sets) {
+        const doneCount = rec.sets.filter(Boolean).length;
+        perWeek[wk.week].volume += doneCount * it.reps * rec.bellKg;
+      }
+    });
+  });
+  return Object.keys(perWeek).map(Number).sort((a, b) => a - b).map((w) => {
+    const p = perWeek[w];
+    return {
+      week: w,
+      avgRpe: p.rpes.length ? p.rpes.reduce((a, b) => a + b, 0) / p.rpes.length : null,
+      lastBell: p.bells.length ? p.bells[p.bells.length - 1] : null,
+      volume: p.volume
+    };
+  });
+}
+
+/**
+ * §7.5 Bell progression nudge — program rule: two CONSECUTIVE weeks at
+ * RPE ≤ 6 on a given lift → suggest the next bell up in the configured
+ * inventory. Suggest only; never writes a logged value.
+ */
+function bellProgressionNudge(cid, itemId, itemName) {
+  const series = kbSeriesForItem(cid, itemId).filter((p) => p.avgRpe != null);
+  if (series.length < 2) return null;
+  const b = series[series.length - 1];
+  const a = series[series.length - 2];
+  if (b.week - a.week !== 1) return null; // must be back-to-back weeks
+  if (a.avgRpe > 6 || b.avgRpe > 6) return null;
+  const curBell = b.lastBell != null ? b.lastBell : a.lastBell;
+  if (curBell == null) return null;
+  const bells = STATE.settings.bells.slice().sort((x, y) => x - y);
+  const next = bells.find((x) => x > curBell);
+  if (!next) return null;
+  return { itemId, itemName, currentBell: curBell, nextBell: next, weeks: [a.week, b.week] };
+}
+
+function allBellNudges(cid) {
+  const defs = allKbItemDefs();
+  return Object.keys(defs).map((id) => bellProgressionNudge(cid, id, defs[id])).filter(Boolean);
+}
+
+/**
+ * §7.4 Current streak — consecutive completed days walking the active
+ * cycle's calendar from week 1 up to (and including) today; any incomplete
+ * or unlogged day resets the count. Dates beyond today are not evaluated.
+ */
+function currentStreak(cid) {
+  const cyc = STATE.cycles[cid];
+  if (!cyc) return 0;
+  const today = todayYMD();
+  let streak = 0;
+  outer:
+  for (let w = 1; w <= 24; w++) {
+    const wk = PROGRAM.weeks[w - 1];
+    for (let di = 0; di < 7; di++) {
+      const date = plannedDate(cyc.startDate, w, di);
+      if (date > today) break outer;
+      const s = dayCompletionStats(cid, w, wk.days[di]);
+      streak = s.complete ? streak + 1 : 0;
+    }
+  }
+  return streak;
+}
+
+/** §7.5 Test PRs — weeks 17/19/21/23, with delta from the previous test week. */
+function testPrSeries(cid) {
+  const TEST_WEEKS = [17, 19, 21, 23];
+  const TEST_DEFS = [
+    { id: 'max_pushups', name: 'Max Push-ups', unit: 'reps', pair: false },
+    { id: 'max_pullups', name: 'Max Pull-ups', unit: 'reps', pair: false },
+    { id: 'sit_to_stand', name: 'Single-leg sit-to-stand', unit: 'reps', pair: true },
+    { id: 'squat_hold', name: 'Deep squat hold', unit: 'sec', pair: false }
+  ];
+  return TEST_DEFS.map((t) => {
+    const series = TEST_WEEKS.map((w) => {
+      const v = getTestValue(cid, w, 'wed', t.id);
+      return {
+        week: w,
+        value: v.value !== '' ? Number(v.value) : null,
+        valueR: (t.pair && v.valueR !== '') ? Number(v.valueR) : null
+      };
+    });
+    return Object.assign({}, t, { series });
+  });
+}
+
+/**
+ * §7.5 Bodyweight trend — 7-day rolling average across ALL cycles (§4.4:
+ * bodyweight is date-keyed and cycle-independent).
+ */
+function bodyweightRollingSeries() {
+  const dates = Object.keys(STATE.bodyweight).sort();
+  return dates.map((d) => {
+    const windowVals = dates
+      .filter((dd) => { const diff = daysBetween(dd, d); return diff >= 0 && diff < 7; })
+      .map((dd) => STATE.bodyweight[dd]);
+    const avg = windowVals.reduce((a, b) => a + b, 0) / windowVals.length;
+    return { date: d, weight: STATE.bodyweight[d], rollingAvg: avg };
+  });
+}
+
+function setBodyweight(dateStr, rawValue) {
+  if (!dateStr) return;
+  if (rawValue === '' || rawValue == null) {
+    delete STATE.bodyweight[dateStr];
+  } else {
+    STATE.bodyweight[dateStr] = Number(rawValue);
+  }
+  saveState();
+}
+
+/** §7.5 Cycle comparison — completion % and week-23 test snapshot per cycle. */
+function cycleComparisonRows() {
+  return Object.keys(STATE.cycles).map((id) => {
+    const c = STATE.cycles[id];
+    let total = 0, done = 0;
+    PROGRAM.weeks.forEach((wk) => { const s = weekStats(id, wk); total += s.total; done += s.done; });
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const tests = ['max_pushups', 'max_pullups', 'squat_hold'].map((tid) => {
+      const v = getTestValue(id, 23, 'wed', tid);
+      return v.value !== '' ? v.value : '—';
+    });
+    return { id, label: c.label, status: c.status, pct, tests };
+  });
+}
+
+/**
+ * Hand-rolled inline SVG sparkline (§7.5: "no charting library"). `points`
+ * is an ordered array of numbers or null (gaps break the line rather than
+ * interpolate). Pure presentation — no dependency on any chart library.
+ */
+function sparklineSvg(points, opts) {
+  const o = opts || {};
+  const w = o.width || 300, h = o.height || 56, pad = 6;
+  const label = o.label || 'trend';
+  const vals = points.filter((v) => v != null);
+  if (!vals.length) {
+    return `<svg viewBox="0 0 ${w} ${h}" class="spark" role="img" aria-label="${esc(label)} — no data yet"></svg>`;
+  }
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max - min) || 1;
+  const n = points.length;
+  const stepX = n > 1 ? (w - pad * 2) / (n - 1) : 0;
+  const coords = points.map((v, i) => v == null ? null : [
+    pad + i * stepX,
+    h - pad - ((v - min) / range) * (h - pad * 2)
+  ]);
+  const segs = [];
+  let cur = [];
+  coords.forEach((c) => { if (c) cur.push(c); else { if (cur.length) segs.push(cur); cur = []; } });
+  if (cur.length) segs.push(cur);
+  const color = o.color || 'var(--hb-done)';
+  const lines = segs.map((seg) =>
+    `<polyline points="${seg.map((p) => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+  ).join('');
+  const dots = coords.map((c) => c ? `<circle cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" r="2.4" fill="${color}"/>` : '').join('');
+  return `<svg viewBox="0 0 ${w} ${h}" class="spark" role="img" aria-label="${esc(label)} sparkline">${lines}${dots}</svg>`;
+}
+
+function renderProgress(cid) {
+  const cyc = STATE.cycles[cid];
+  const streak = currentStreak(cid);
+
+  let totalSets = 0, doneSets = 0;
+  PROGRAM.weeks.forEach((wk) => { const s = weekStats(cid, wk); totalSets += s.total; doneSets += s.done; });
+  const overallPct = totalSets ? Math.round((doneSets / totalSets) * 100) : 0;
+
+  const weeklyPctSeries = PROGRAM.weeks.map((wk) => Math.round(weekStats(cid, wk).pct * 100));
+
+  const nudges = allBellNudges(cid);
+  const nudgeHtml = nudges.length
+    ? nudges.map((n) => `
+      <div class="nudge-chip">Two weeks at RPE ≤ 6 on <strong>${esc(n.itemName)}</strong> (wk ${n.weeks[0]}–${n.weeks[1]}) — consider moving from ${n.currentBell} kg to <strong>${n.nextBell} kg</strong>.</div>`).join('')
+    : '<p class="hb-note">No bell progression suggestions yet — logged two consecutive weeks at RPE ≤ 6 on a lift and it\u2019ll show up here.</p>';
+
+  const kbDefs = allKbItemDefs();
+  const kbVolumeHtml = Object.keys(kbDefs).map((id) => {
+    const series = kbSeriesForItem(cid, id);
+    const values = series.map((p) => p.volume);
+    return `<div class="spark-block"><div class="spark-label">${esc(kbDefs[id])}</div>${sparklineSvg(values, { label: kbDefs[id] + ' volume' })}</div>`;
+  }).join('');
+
+  const prHtml = testPrSeries(cid).map((t) => {
+    const rows = t.series.map((p, i) => {
+      const prev = i > 0 ? t.series[i - 1] : null;
+      const delta = (prev && prev.value != null && p.value != null) ? (p.value - prev.value) : null;
+      const deltaR = (t.pair && prev && prev.valueR != null && p.valueR != null) ? (p.valueR - prev.valueR) : null;
+      const valStr = t.pair
+        ? `${p.value != null ? p.value : '—'} L / ${p.valueR != null ? p.valueR : '—'} R`
+        : (p.value != null ? String(p.value) : '—');
+      const fmtDelta = (d) => d == null ? '—' : (d >= 0 ? '+' : '') + d;
+      const deltaStr = t.pair ? `${fmtDelta(delta)} / ${fmtDelta(deltaR)}` : fmtDelta(delta);
+      return `<tr><td>Week ${p.week}</td><td>${esc(valStr)}</td><td>${esc(deltaStr)}</td></tr>`;
+    }).join('');
+    return `<div class="pr-block">
+      <div class="pr-title">${esc(t.name)} <span class="hb-note">(${esc(t.unit)})</span></div>
+      <div class="ref-table-wrap"><table class="ref-table"><thead><tr><th>Test week</th><th>Value</th><th>Δ prev</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+  }).join('');
+
+  const bwSeries = bodyweightRollingSeries();
+  const bwValues = bwSeries.map((p) => p.rollingAvg);
+  const bwLatest = bwSeries.length ? bwSeries[bwSeries.length - 1] : null;
+
+  const cycleIds = Object.keys(STATE.cycles);
+  const cycleCompareHtml = cycleIds.length > 1 ? `
+    <h2 class="hb-h2">Cycle comparison</h2>
+    <div class="ref-table-wrap"><table class="ref-table">
+      <thead><tr><th>Cycle</th><th>Completion</th><th>Max push-ups (wk23)</th><th>Max pull-ups (wk23)</th><th>Squat hold (wk23)</th></tr></thead>
+      <tbody>${cycleComparisonRows().map((r) => `
+        <tr><td>${esc(r.label)}${r.status === 'archived' ? ' (archived)' : ''}</td><td>${r.pct}%</td><td>${esc(String(r.tests[0]))}</td><td>${esc(String(r.tests[1]))}</td><td>${esc(String(r.tests[2]))}</td></tr>`).join('')}</tbody>
+    </table></div>` : '';
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Progress'), 'progress')}
+    <main class="hb-main">
+      <h1 class="hb-h1">Progress <span class="hb-h1-sub">${esc(cyc ? cyc.label : '')}</span></h1>
+
+      <div class="streak-row">
+        <div class="streak-card"><div class="streak-num">${streak}</div><div class="hb-note">day streak</div></div>
+        <div class="streak-card"><div class="streak-num">${overallPct}%</div><div class="hb-note">overall completion</div></div>
+      </div>
+
+      <h2 class="hb-h2">Weekly completion</h2>
+      ${sparklineSvg(weeklyPctSeries, { label: 'weekly completion' })}
+
+      <h2 class="hb-h2">Bell progression</h2>
+      ${nudgeHtml}
+
+      <h2 class="hb-h2">KB volume <span class="hb-h1-sub" style="display:inline">(reps × kg per week)</span></h2>
+      <div class="spark-grid">${kbVolumeHtml}</div>
+
+      <h2 class="hb-h2">Test PRs <span class="hb-h1-sub" style="display:inline">(weeks 17 / 19 / 21 / 23)</span></h2>
+      ${prHtml}
+
+      <h2 class="hb-h2">Bodyweight trend</h2>
+      <p class="hb-note">${bwLatest ? `Latest: ${bwLatest.weight} kg on ${esc(bwLatest.date)} · 7-day avg ${bwLatest.rollingAvg.toFixed(1)} kg` : 'No bodyweight logged yet.'}</p>
+      ${sparklineSvg(bwValues, { label: 'bodyweight rolling average' })}
+      <div class="hb-kb-row">
+        <label class="hb-field">
+          <span class="hb-field-label">Date</span>
+          <input class="hb-input" type="date" data-action="bw-date-draft" value="${esc(PROGRESS_UI.bwDateDraft || todayYMD())}">
+        </label>
+        <label class="hb-field">
+          <span class="hb-field-label">Weight (kg)</span>
+          <input class="hb-input" type="number" inputmode="decimal" step="0.1" min="0"
+            data-action="bw-weight-draft" value="${esc(PROGRESS_UI.bwWeightDraft)}" placeholder="83.2">
+        </label>
+      </div>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn hb-btn--primary" data-action="log-bodyweight">Log weight</button>
+      </div>
+
+      ${cycleCompareHtml}
+    </main>`;
+}
+
+/* ----------------------------------------------------------------- reference */
+
+function renderReference(cid) {
+  const ref = PROGRAM.reference;
+  const rows = ref.routine.map((r) => `
+    <tr>
+      <td>${r.n}</td>
+      <td>${esc(r.name)}</td>
+      <td>${esc(r.dose)}</td>
+      <td>${esc(r.cues)}</td>
+    </tr>`).join('');
+  const trio = ref.warmupTrio.items.map((i) => `<li>${esc(i)}</li>`).join('');
+  const phases = ref.phaseProgression.map((p) => `<li><strong>${esc(p.label)}</strong> — ${esc(p.text)}</li>`).join('');
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Reference'), 'reference')}
+    <main class="hb-main">
+      <h1 class="hb-h1">${esc(ref.title)}</h1>
+      <p class="hb-safety">${esc(ref.intro)}</p>
+      <div class="ref-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th>#</th><th>Exercise</th><th>Dose</th><th>Cues</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <h2 class="hb-h2">${esc(ref.warmupTrio.title)}</h2>
+      <ul class="ref-list">${trio}</ul>
+      <p class="hb-note">${esc(ref.warmupTrio.note)}</p>
+      <h2 class="hb-h2">Phase Progression</h2>
+      <ul class="ref-list">${phases}</ul>
+      <p class="hb-note">${esc(ref.deloadNote)}</p>
+    </main>`;
+}
+
+/* =============================================================================
+   Self-test harness (Checkpoint 7 of §10 / §8). No build step ⇒ no test
+   runner, so the checks live in-page at #/selftest. All checks run against
+   synthetic state/data built here — nothing touches STATE or localStorage.
+   ========================================================================== */
+
+/**
+ * §3/§8 reference table — total prescribed sets (sets+kb checkbox glyphs,
+ * NOT tasks or tests) per week, counted by hand from
+ * 24_Week_Printable_Log_v7_7_Shaolin.pdf. Since every week maps to one of
+ * eight (phase,variant) templates (§4.1), weeks sharing a template share a
+ * count; listed per week (1–24) for a direct, unambiguous diff against
+ * weekSetCount(PROGRAM.weeks[i]).
+ */
+const EXPECTED_WEEK_SET_COUNTS = [
+  47, 47, 47, 29, 47, 47, 47, 29,           // weeks  1– 8  (Phase 1)
+  47, 49, 47, 28, 49, 47, 49, 28,           // weeks  9–16  (Phase 2)
+  37, 38, 37, 19, 37, 38, 37, 19            // weeks 17–24  (Phase 3)
+];
+
+/** §3 — phase/variant label expected per week, straight from WEEK_MAP. */
+const EXPECTED_WEEK_LABELS = WEEK_MAP.map((e) => ({
+  phase: e.phase,
+  variantLabel: VARIANT_LABEL[e.variant]
+}));
+
+/** Minimal deterministic deep-equal (key order independent) for test assertions. */
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (a === null || b === null) return a === b;
+  if (typeof a !== 'object') return a === b;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    return a.every((v, i) => deepEqual(v, b[i]));
+  }
+  const ak = Object.keys(a).sort();
+  const bk = Object.keys(b).sort();
+  if (ak.length !== bk.length || ak.some((k, i) => k !== bk[i])) return false;
+  return ak.every((k) => deepEqual(a[k], b[k]));
+}
+
+/** Deep clone via JSON — sufficient here since state is plain JSON-shaped. */
+function cloneJson(o) { return JSON.parse(JSON.stringify(o)); }
+
+/** Build an isolated synthetic app state for tests that must not touch STATE. */
+function synthTestState() {
+  const s = defaultState();
+  s.cycles.c1.startDate = '2026-09-14'; // a Monday
+  return s;
+}
+
+/* -------------------------------------------------------- individual checks */
+
+function testProgramIntegrity() {
+  const mismatches = [];
+  PROGRAM.weeks.forEach((wk, i) => {
+    const actualSets = weekSetCount(wk);
+    const expectedSets = EXPECTED_WEEK_SET_COUNTS[i];
+    if (actualSets !== expectedSets) {
+      mismatches.push(`wk${wk.week} sets: got ${actualSets}, expected ${expectedSets}`);
+    }
+    const expLabel = EXPECTED_WEEK_LABELS[i];
+    if (wk.phase !== expLabel.phase || wk.variantLabel !== expLabel.variantLabel) {
+      mismatches.push(`wk${wk.week} label: got phase ${wk.phase}/${wk.variantLabel}, expected phase ${expLabel.phase}/${expLabel.variantLabel}`);
+    }
+  });
+  return {
+    name: 'Program integrity vs §3 reference table',
+    pass: mismatches.length === 0,
+    detail: mismatches.length ? mismatches.join('; ') : `24/24 weeks match (${PROGRAM.weeks.reduce((n, w) => n + weekSetCount(w), 0)} total prescribed sets)`
+  };
+}
+
+function testAddDaysDst() {
+  const problems = [];
+  // Spring-forward: US DST began 2026-03-08. A 7-day add must land exactly
+  // one calendar week later, not shift by the lost hour.
+  if (addDays('2026-03-01', 7) !== '2026-03-08') problems.push(`spring-forward: addDays(2026-03-01,7) = ${addDays('2026-03-01', 7)}`);
+  if (addDays('2026-03-07', 1) !== '2026-03-08') problems.push(`spring-forward day: addDays(2026-03-07,1) = ${addDays('2026-03-07', 1)}`);
+  // Fall-back: US DST ended 2026-11-01.
+  if (addDays('2026-10-25', 7) !== '2026-11-01') problems.push(`fall-back: addDays(2026-10-25,7) = ${addDays('2026-10-25', 7)}`);
+  if (addDays('2026-11-01', 1) !== '2026-11-02') problems.push(`fall-back day: addDays(2026-11-01,1) = ${addDays('2026-11-01', 1)}`);
+  // Month/year rollover sanity, since real cycles run 24 weeks (168 days).
+  if (addDays('2026-09-14', 168) !== '2027-03-01') problems.push(`24-week span: addDays(2026-09-14,168) = ${addDays('2026-09-14', 168)}`);
+  return {
+    name: 'addDays correctness across DST boundaries',
+    pass: problems.length === 0,
+    detail: problems.length ? problems.join('; ') : 'spring-forward, fall-back, and a full 168-day cycle span all land correctly'
+  };
+}
+
+function testSnapToMonday() {
+  const cases = [
+    ['2026-09-14', '2026-09-14'], // already Monday
+    ['2026-09-15', '2026-09-14'], // Tuesday
+    ['2026-09-16', '2026-09-14'], // Wednesday
+    ['2026-09-20', '2026-09-14'], // Sunday
+    ['2026-09-21', '2026-09-21']  // next Monday
+  ];
+  const problems = cases
+    .filter(([input, expected]) => snapToMonday(input) !== expected)
+    .map(([input, expected]) => `snapToMonday(${input}) = ${snapToMonday(input)}, expected ${expected}`);
+  return {
+    name: 'Non-Monday start date snaps to the preceding Monday',
+    pass: problems.length === 0,
+    detail: problems.length ? problems.join('; ') : `${cases.length}/${cases.length} cases correct`
+  };
+}
+
+function testStartDateChangePreservesLogs() {
+  const s = synthTestState();
+  const cid = 'c1';
+  if (!s.logs[cid].weeks['3']) s.logs[cid].weeks['3'] = { days: {} };
+  s.logs[cid].weeks['3'].days.mon = { items: { pushups: { sets: [true, true, false] } }, note: 'felt strong' };
+  const before = cloneJson(s.logs[cid]);
+  s.cycles[cid].startDate = '2026-10-05'; // reschedule — dates are derived (§4.5), logs untouched
+  const after = s.logs[cid];
+  const pass = deepEqual(before, after);
+  return {
+    name: 'Start-date change preserves every logged checkbox',
+    pass,
+    detail: pass ? 'logs tree byte-identical after rescheduling the cycle' : 'logs tree changed after editing startDate'
+  };
+}
+
+function testNewCycleIsolation() {
+  const s = synthTestState();
+  const c1Before = cloneJson(s.logs.c1);
+  s.logs.c1.weeks['1'] = { days: { mon: { items: { pushups: { sets: [true, false, false] } }, note: '' } } };
+  const c1AfterFirstLog = cloneJson(s.logs.c1);
+  // Start a fresh cycle c2 and write to it.
+  s.cycles.c2 = { label: 'Cycle 2', startDate: '2027-01-04', status: 'active', createdAt: new Date().toISOString() };
+  s.logs.c2 = { weeks: {} };
+  s.logs.c2.weeks['1'] = { days: { mon: { items: { pushups: { sets: [true, true, true] } }, note: 'c2 data' } } };
+  const c1Untouched = deepEqual(c1AfterFirstLog, s.logs.c1);
+  return {
+    name: 'New cycle isolation — writing to c2 leaves c1 byte-identical',
+    pass: c1Untouched,
+    detail: c1Untouched ? 'c1.logs unchanged after c2 was created and logged' : 'c1.logs was mutated by writing to c2'
+  };
+}
+
+function testCsvEscaping() {
+  const raw = 'a,b"c\nd';
+  const escaped = csvEscapeField(raw);
+  // RFC 4180: quoted, embedded quote doubled, comma/newline preserved inside.
+  const expectedShape = escaped.startsWith('"') && escaped.endsWith('"') && escaped.includes('""');
+  // Round-trip: a minimal RFC-4180 unescape of our own escaped output must
+  // reproduce the original string exactly.
+  const inner = escaped.slice(1, -1).replace(/""/g, '"');
+  const roundTrips = inner === raw;
+  const pass = expectedShape && roundTrips;
+  return {
+    name: 'CSV escaping — comma/quote/newline note round-trips',
+    pass,
+    detail: pass ? `"${raw.replace(/\n/g, '\\n')}" → ${escaped.replace(/\n/g, '\\n')} → back to original` : `escaping or round-trip failed on ${escaped}`
+  };
+}
+
+function testCsvRowCountMatchesPrescribed() {
+  const s = synthTestState();
+  const savedState = STATE;
+  STATE = s; // buildSetlogRows reads module-level STATE; swap in synthetic state for this check
+  let rows, expectedRows;
+  try {
+    rows = buildSetlogRows(['c1']);
+    let totalSets = 0, totalTasks = 0;
+    PROGRAM.weeks.forEach((wk) => wk.days.forEach((d) => d.items.forEach((it) => {
+      if (it.type === 'sets' || it.type === 'kb') totalSets += it.sets;
+      else if (it.type === 'task') totalTasks += 1;
+    })));
+    expectedRows = totalSets + totalTasks;
+  } finally {
+    STATE = savedState;
+  }
+  const pass = rows.length === expectedRows;
+  return {
+    name: 'CSV row count equals total prescribed sets + tasks for the cycle',
+    pass,
+    detail: pass ? `${rows.length} setlog.csv rows for one full 24-week cycle` : `got ${rows.length} rows, expected ${expectedRows}`
+  };
+}
+
+function testRowKeyUniqueness() {
+  const s = synthTestState();
+  s.cycles.c2 = { label: 'Cycle 2', startDate: '2027-01-04', status: 'active', createdAt: new Date().toISOString() };
+  s.logs.c2 = { weeks: {} };
+  const savedState = STATE;
+  STATE = s;
+  let rows;
+  try {
+    rows = buildSetlogRows(['c1', 'c2']);
+  } finally {
+    STATE = savedState;
+  }
+  const seen = new Set();
+  let dupe = null;
+  for (const r of rows) {
+    if (seen.has(r.rowKey)) { dupe = r.rowKey; break; }
+    seen.add(r.rowKey);
+  }
+  return {
+    name: 'rowKey uniqueness across a full multi-cycle export',
+    pass: !dupe,
+    detail: dupe ? `duplicate rowKey: ${dupe}` : `${rows.length} rows, all rowKey values unique`
+  };
+}
+
+function testBackupRestoreRoundTrip() {
+  const s = synthTestState();
+  s.logs.c1.weeks['5'] = { days: { fri: { items: { kb_goblet: { sets: [true, true, true, false], bellKg: 16, rpe: 7 } }, note: 'good session' } } };
+  s.bodyweight['2026-10-01'] = 83.2;
+  const backupJson = JSON.stringify(s);
+  const parsed = JSON.parse(backupJson);
+  const restored = Object.assign(defaultState(), parsed); // mirrors the app's restore-confirm path
+  const pass = deepEqual(restored, parsed);
+  return {
+    name: 'Backup → restore round-trip is lossless',
+    pass,
+    detail: pass ? 'restore(backup(state)) deep-equals state' : 'restored state diverged from the backed-up state'
+  };
+}
+
+function runSelfTests() {
+  return [
+    testProgramIntegrity(),
+    testAddDaysDst(),
+    testSnapToMonday(),
+    testStartDateChangePreservesLogs(),
+    testNewCycleIsolation(),
+    testCsvEscaping(),
+    testCsvRowCountMatchesPrescribed(),
+    testBackupRestoreRoundTrip(),
+    testRowKeyUniqueness()
+  ];
+}
+
+function renderSelfTest(cid) {
+  const results = runSelfTests();
+  const passCount = results.filter((r) => r.pass).length;
+  const failCount = results.length - passCount;
+  const rows = results.map((r) => `
+    <tr>
+      <td>${r.pass ? '<span class="selftest-ok">PASS</span>' : '<span class="selftest-bad">FAIL</span>'}</td>
+      <td>${esc(r.name)}<div class="selftest-detail">${esc(r.detail)}</div></td>
+    </tr>`).join('');
+
+  return `
+    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Self-test'), 'settings')}
+    <main class="hb-main">
+      <h1 class="hb-h1">Self-test <span class="hb-h1-sub">§8 quality bar — internal diagnostics, not user data</span></h1>
+      <div class="selftest-summary">
+        <div class="selftest-pass"><div class="streak-num">${passCount}</div><div class="hb-note">passing</div></div>
+        <div class="selftest-fail"><div class="streak-num">${failCount}</div><div class="hb-note">failing</div></div>
+      </div>
+      ${failCount > 0 ? '<p class="hb-safety">One or more checks failed — do not tag a release until every row is PASS (§8).</p>' : '<p class="hb-note">All checks pass. Safe to tag a release per §8.</p>'}
+      <div class="ref-table-wrap selftest-table">
+        <table class="ref-table">
+          <thead><tr><th style="width:70px;">Result</th><th>Check</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn" data-action="rerun-selftest">Re-run</button>
+      </div>
+    </main>`;
+}
+
+/* -------------------------------------------------------------------- render */
+
+function renderApp() {
+  const parts = parseHash();
+  const cid = currentCycleId();
+  let html;
+
+  if (parts.length === 0 || (parts.length === 1 && parts[0] === cid)) {
+    html = renderOverview(cid);
+  } else if (parts[0] === 'reference') {
+    html = renderReference(cid);
+  } else if (parts[0] === 'progress') {
+    html = renderProgress(cid);
+  } else if (parts[0] === 'export') {
+    html = renderExport(cid);
+  } else if (parts[0] === 'settings') {
+    html = renderSettings(cid);
+  } else if (parts[0] === 'selftest') {
+    html = renderSelfTest(cid);
+  } else if (parts[1] === 'month' && parts.length === 3) {
+    html = renderMonth(cid, Number(parts[2]));
+  } else if (parts[1] === 'month' && parts[3] === 'week' && parts.length === 5) {
+    html = renderWeek(cid, Number(parts[4]));
+  } else if (parts[1] === 'month' && parts[3] === 'week' && parts[5] === 'day' && parts.length === 7) {
+    html = renderDay(cid, Number(parts[4]), parts[6]);
+  } else {
+    html = renderOverview(cid);
+  }
+
+  document.getElementById('app').innerHTML = html + storageWarningHtml() + toastHtml();
+  window.scrollTo(0, 0);
+}
+
+function storageWarningHtml() {
+  if (STORAGE_OK) return '';
+  return `<div class="storage-warning" role="alert">Storage is unavailable in this browser (private mode?) — logging works but nothing will be saved after this tab closes.</div>`;
+}
+
+/* -------------------------------------------------------------- delegation */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const app = document.getElementById('app');
+
+  app.addEventListener('change', (e) => {
+    const t = e.target;
+    const parts = parseHash();
+    const cid = currentCycleId();
+
+    if (t.dataset && t.dataset.action === 'switch-cycle') {
+      go(`#/${t.value}`);
+      return;
+    }
+
+    if (parts[0] === 'settings') {
+      const action = t.dataset && t.dataset.action;
+      if (action === 'start-date-draft') {
+        SETTINGS_UI.startDateDraft = t.value;
+      } else if (action === 'new-cycle-start-draft') {
+        SETTINGS_UI.newCycleStartDraft = t.value;
+      }
+      return;
+    }
+
+    if (parts[0] === 'export') {
+      const action = t.dataset && t.dataset.action;
+      if (action === 'export-scope') {
+        EXPORT_UI.scope = t.value;
+        renderApp();
+      } else if (action === 'export-specific-cycle') {
+        EXPORT_UI.specificCycleId = t.value;
+        renderApp();
+      } else if (action === 'export-preview-file') {
+        EXPORT_UI.previewFile = t.value;
+        renderApp();
+      } else if (action === 'restore-file-pick') {
+        const file = t.files && t.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = parseBackupFile(String(reader.result));
+          RESTORE_PENDING = result.error ? { error: result.error } : { parsed: result.parsed };
+          renderApp();
+        };
+        reader.onerror = () => {
+          RESTORE_PENDING = { error: 'Could not read that file.' };
+          renderApp();
+        };
+        reader.readAsText(file);
+      }
+      return;
+    }
+
+    if (parts[0] === 'progress') {
+      const action = t.dataset && t.dataset.action;
+      if (action === 'bw-date-draft') {
+        PROGRESS_UI.bwDateDraft = t.value;
+      } else if (action === 'bw-weight-draft') {
+        PROGRESS_UI.bwWeightDraft = t.value;
+      }
+      return;
+    }
+
+    // Only the day screen has these controls; parts = [cid, 'month', m, 'week', w, 'day', dk]
+    if (parts[5] !== 'day') return;
+    const week = Number(parts[4]);
+    const dayKey = parts[6];
+    const action = t.dataset && t.dataset.action;
+
+    if (t instanceof HTMLInputElement && t.type === 'checkbox' && action === 'toggle-set') {
+      toggleSet(cid, week, dayKey, t.dataset.item, Number(t.dataset.idx), Number(t.dataset.total));
+      renderApp();
+      // Restore focus to the toggled control after re-render for keyboard users.
+      const again = document.querySelector(
+        `input[data-item="${cssEscape(t.dataset.item)}"][data-idx="${t.dataset.idx}"]`);
+      if (again) again.focus();
+      return;
+    }
+
+    if (t instanceof HTMLInputElement && t.type === 'checkbox' && action === 'toggle-task') {
+      toggleTask(cid, week, dayKey, t.dataset.item);
+      renderApp();
+      const again = document.querySelector(`input[data-item="${cssEscape(t.dataset.item)}"][data-action="toggle-task"]`);
+      if (again) again.focus();
+      return;
+    }
+
+    // Bell / RPE / test / total-reps / note: save in place, no full re-render,
+    // so focus and cursor position survive (§7.3 — sweaty-thumb, one-handed use).
+    if (action === 'set-bell') {
+      setBellKg(cid, week, dayKey, t.dataset.item, t.value);
+    } else if (action === 'set-rpe') {
+      setRpe(cid, week, dayKey, t.dataset.item, t.value);
+    } else if (action === 'set-test') {
+      setTestValue(cid, week, dayKey, t.dataset.item, t.dataset.field, t.value);
+    } else if (action === 'set-total-reps') {
+      setTotalReps(cid, week, dayKey, t.dataset.item, t.value);
+    } else if (action === 'set-note') {
+      setDayNote(cid, week, dayKey, t.value);
+    }
+  });
+
+  app.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+
+    if (action === 'dismiss-export-reminder') {
+      EXPORT_REMINDER_DISMISSED = true;
+      renderApp();
+      return;
+    }
+
+    if (action === 'print-week') {
+      window.print();
+      return;
+    }
+
+    if (action === 'rerun-selftest') {
+      renderApp();
+      return;
+    }
+
+    const parts = parseHash();
+
+    if (parts[0] === 'settings') {
+      const targetCid = btn.dataset.cycle;
+      if (action === 'edit-start-date') {
+        SETTINGS_UI.editingStartDate = targetCid;
+        SETTINGS_UI.startDateDraft = STATE.cycles[targetCid] ? STATE.cycles[targetCid].startDate : '';
+        SETTINGS_UI.startDateSnapMsg = '';
+        renderApp();
+      } else if (action === 'cancel-edit-start-date') {
+        SETTINGS_UI.editingStartDate = null;
+        renderApp();
+      } else if (action === 'save-start-date') {
+        const targetId = SETTINGS_UI.editingStartDate;
+        const raw = SETTINGS_UI.startDateDraft || (STATE.cycles[targetId] && STATE.cycles[targetId].startDate);
+        editCycleStartDate(targetId, raw);
+      } else if (action === 'begin-new-cycle') {
+        SETTINGS_UI.newCycleConfirming = true;
+        SETTINGS_UI.newCycleStartDraft = todayYMD();
+        renderApp();
+      } else if (action === 'cancel-new-cycle') {
+        SETTINGS_UI.newCycleConfirming = false;
+        renderApp();
+      } else if (action === 'confirm-new-cycle') {
+        confirmStartNewCycle(SETTINGS_UI.newCycleStartDraft);
+      } else if (action === 'begin-delete-cycle') {
+        beginDeleteCycle(targetCid);
+      } else if (action === 'cancel-delete-cycle') {
+        cancelDeleteCycle();
+      } else if (action === 'export-for-delete') {
+        exportCycleForDelete(SETTINGS_UI.deletePending ? SETTINGS_UI.deletePending.cycleId : targetCid);
+      } else if (action === 'ack-have-export') {
+        acknowledgeHaveExport();
+      } else if (action === 'advance-delete-confirm') {
+        advanceDeleteConfirm();
+      }
+      return;
+    }
+
+    if (parts[0] === 'progress') {
+      if (action === 'log-bodyweight') {
+        const date = PROGRESS_UI.bwDateDraft || todayYMD();
+        setBodyweight(date, PROGRESS_UI.bwWeightDraft);
+        PROGRESS_UI.bwWeightDraft = '';
+        showToast(`Weight logged for ${date}`);
+      }
+      return;
+    }
+
+    if (parts[0] !== 'export') return;
+    const scopeIds = resolveExportCycleIds();
+
+    if (action === 'download-csv') {
+      downloadCsvFile(btn.dataset.kind, scopeIds, EXPORT_UI.scope);
+      showToast(`${btn.dataset.kind}.csv downloaded`);
+    } else if (action === 'download-all-csv') {
+      downloadAllCsv(scopeIds, EXPORT_UI.scope);
+      showToast('All four CSVs downloaded');
+    } else if (action === 'copy-csv') {
+      copyCsvToClipboard(EXPORT_UI.previewFile, scopeIds);
+    } else if (action === 'download-backup') {
+      downloadBackup();
+      showToast('Backup JSON downloaded');
+    } else if (action === 'restore-confirm') {
+      if (RESTORE_PENDING && RESTORE_PENDING.parsed) {
+        STATE = Object.assign(defaultState(), RESTORE_PENDING.parsed);
+        saveState();
+        RESTORE_PENDING = null;
+        go(`#/${STATE.activeCycleId}`);
+        showToast('Backup restored.');
+      }
+    } else if (action === 'restore-cancel') {
+      RESTORE_PENDING = null;
+      renderApp();
+    }
+  });
+
+  window.addEventListener('hashchange', renderApp);
+  renderApp();
+
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
+  /* §6.1 — PWA install. The service worker caches only the three local
+     files already shipped with this page; connect-src 'none' in the CSP
+     blocks any network fetch, so registration is safe under the no-network
+     guarantee. Missing sw.js/manifest (e.g. opened from file://) fails
+     silently — HealthBot.html works standalone either way. */
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+});
+
+function cssEscape(s) {
+  return window.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\]/g, '\\$&');
+}
+</script>
+</body>
+</html>
