@@ -522,6 +522,14 @@ button, input, select { font: inherit; color: inherit; }
   flex: 1 1 120px;
 }
 
+/* Bodyweight log row only: give the native date picker room so it wraps
+   cleanly onto its own line on narrow viewports instead of overlapping
+   the weight field. Scoped to .hb-bw-row so other .hb-kb-row widgets
+   (Bell/RPE, test inputs) are unaffected. */
+.hb-bw-row .hb-field {
+  min-width: 150px;
+}
+
 .hb-field-label {
   font-size: 0.72rem;
   font-weight: 600;
@@ -1819,7 +1827,7 @@ function renderMonth(cid, monthNo) {
   }).join('');
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb(`Month ${monthNo}`), 'overview')}
+    ${topBar(cid, crumb(`Month ${monthNo}`), 'overview')}
     <main class="hb-main">
       <h1 class="hb-h1">${esc(month.label)}</h1>
       <div class="week-list">${rows}</div>
@@ -1866,7 +1874,7 @@ function renderWeek(cid, weekNo) {
   }).join('');
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb(`Month ${wk.month}`, `#/${cid}/month/${wk.month}`) + crumb(`Week ${weekNo}`), 'overview')}
+    ${topBar(cid, crumb(`Month ${wk.month}`, `#/${cid}/month/${wk.month}`) + crumb(`Week ${weekNo}`), 'overview')}
     <main class="hb-main screen-only">
       <h1 class="hb-h1">${esc(wk.header)}</h1>
       <p class="hb-protocol">${esc(wk.protocol)}</p>
@@ -1877,7 +1885,7 @@ function renderWeek(cid, weekNo) {
       <div class="day-list">${days}</div>
 
       <h2 class="hb-h2">Log bodyweight</h2>
-      <div class="hb-kb-row">
+      <div class="hb-kb-row hb-bw-row">
         <label class="hb-field">
           <span class="hb-field-label">Date</span>
           <input class="hb-input" type="date" data-action="bw-date-draft" value="${esc(PROGRESS_UI.bwDateDraft || todayYMD())}">
@@ -1885,7 +1893,7 @@ function renderWeek(cid, weekNo) {
         <label class="hb-field">
           <span class="hb-field-label">Weight (lb)</span>
           <input class="hb-input" type="number" inputmode="decimal" step="0.1" min="0"
-            data-action="bw-weight-draft" value="${esc(PROGRESS_UI.bwWeightDraft)}" placeholder="83.2">
+            data-action="bw-weight-draft" value="${esc(PROGRESS_UI.bwWeightDraft)}" placeholder="0">
         </label>
       </div>
       <div class="hb-check-row">
@@ -1985,7 +1993,7 @@ function renderDay(cid, weekNo, dayKey) {
     <header class="hb-topbar hb-topbar--sticky">
       <div class="hb-topbar-row">
         <a class="hb-brand" href="#/${cid}">HealthBot</a>
-        <nav class="hb-crumbs" aria-label="Breadcrumb">${crumb('Overview', `#/${cid}`)}${crumb(`Wk ${weekNo}`, `#/${cid}/month/${wk.month}/week/${weekNo}`)}${crumb(day.name)}</nav>
+        <nav class="hb-crumbs" aria-label="Breadcrumb">${crumb(`Wk ${weekNo}`, `#/${cid}/month/${wk.month}/week/${weekNo}`)}${crumb(day.name)}</nav>
         <span class="hb-today-btn hb-today-btn--static">${s.total ? `${s.done}/${s.total}` : '—'}</span>
       </div>
       <div class="bar bar--sticky"><div class="bar-fill" style="width:${pct}%"></div></div>
@@ -3427,7 +3435,7 @@ function renderSelfTest(cid) {
     </tr>`).join('');
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Self-test'), 'settings')}
+    ${topBar(cid, crumb('Self-test'), 'settings')}
     <main class="hb-main">
       <h1 class="hb-h1">Self-test <span class="hb-h1-sub">§8 quality bar — internal diagnostics, not user data</span></h1>
       <div class="selftest-summary">
