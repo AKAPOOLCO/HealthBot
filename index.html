@@ -1784,7 +1784,7 @@ function renderOverview(cid) {
   }).join('');
 
   return `
-    ${topBar(cid, crumb('Overview'), 'overview')}
+    ${topBar(cid, '', 'overview')}
     <main class="hb-main">
       <h1 class="hb-h1">24-Week Program <span class="hb-h1-sub">${esc(cyc ? cyc.label : '')}</span></h1>
       ${archivedBanner}
@@ -1875,6 +1875,22 @@ function renderWeek(cid, weekNo) {
         <button type="button" class="hb-btn" data-action="print-week">Print this week</button>
       </div>
       <div class="day-list">${days}</div>
+
+      <h2 class="hb-h2">Log bodyweight</h2>
+      <div class="hb-kb-row">
+        <label class="hb-field">
+          <span class="hb-field-label">Date</span>
+          <input class="hb-input" type="date" data-action="bw-date-draft" value="${esc(PROGRESS_UI.bwDateDraft || todayYMD())}">
+        </label>
+        <label class="hb-field">
+          <span class="hb-field-label">Weight (lb)</span>
+          <input class="hb-input" type="number" inputmode="decimal" step="0.1" min="0"
+            data-action="bw-weight-draft" value="${esc(PROGRESS_UI.bwWeightDraft)}" placeholder="83.2">
+        </label>
+      </div>
+      <div class="hb-check-row">
+        <button type="button" class="hb-btn hb-btn--primary" data-action="log-bodyweight">Log weight</button>
+      </div>
     </main>
     ${renderWeekPrintable(cid, wk)}`;
 }
@@ -2516,7 +2532,7 @@ function renderExport(cid) {
   const previewRows = kindRows(EXPORT_UI.previewFile, scopeIds).slice(0, 20);
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Export'), 'export')}
+    ${topBar(cid, '', 'export')}
     <main class="hb-main">
       <h1 class="hb-h1">Export</h1>
       <p class="hb-note">Last export: ${esc(lastExport)}</p>
@@ -2816,7 +2832,7 @@ function renderSettings(cid) {
       : 'Not granted — on iOS Safari, an unvisited tab\u2019s storage can be evicted after about a week. Installing to your home screen (Add to Home Screen) is far more durable.';
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Settings'), 'settings')}
+    ${topBar(cid, '', 'settings')}
     <main class="hb-main">
       <h1 class="hb-h1">Settings</h1>
 
@@ -3098,7 +3114,7 @@ function renderProgress(cid) {
     </table></div>` : '';
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Progress'), 'progress')}
+    ${topBar(cid, '', 'progress')}
     <main class="hb-main">
       <h1 class="hb-h1">Progress <span class="hb-h1-sub">${esc(cyc ? cyc.label : '')}</span></h1>
 
@@ -3120,22 +3136,8 @@ function renderProgress(cid) {
       ${prHtml}
 
       <h2 class="hb-h2">Bodyweight trend</h2>
-      <p class="hb-note">${bwLatest ? `Latest: ${bwLatest.weight} kg on ${esc(bwLatest.date)} · 7-day avg ${bwLatest.rollingAvg.toFixed(1)} kg` : 'No bodyweight logged yet.'}</p>
+      <p class="hb-note">${bwLatest ? `Latest: ${bwLatest.weight} lb on ${esc(bwLatest.date)} · 7-day avg ${bwLatest.rollingAvg.toFixed(1)} lb` : 'No bodyweight logged yet.'}</p>
       ${sparklineSvg(bwValues, { label: 'bodyweight rolling average' })}
-      <div class="hb-kb-row">
-        <label class="hb-field">
-          <span class="hb-field-label">Date</span>
-          <input class="hb-input" type="date" data-action="bw-date-draft" value="${esc(PROGRESS_UI.bwDateDraft || todayYMD())}">
-        </label>
-        <label class="hb-field">
-          <span class="hb-field-label">Weight (kg)</span>
-          <input class="hb-input" type="number" inputmode="decimal" step="0.1" min="0"
-            data-action="bw-weight-draft" value="${esc(PROGRESS_UI.bwWeightDraft)}" placeholder="83.2">
-        </label>
-      </div>
-      <div class="hb-check-row">
-        <button type="button" class="hb-btn hb-btn--primary" data-action="log-bodyweight">Log weight</button>
-      </div>
 
       ${cycleCompareHtml}
     </main>`;
@@ -3156,7 +3158,7 @@ function renderReference(cid) {
   const phases = ref.phaseProgression.map((p) => `<li><strong>${esc(p.label)}</strong> — ${esc(p.text)}</li>`).join('');
 
   return `
-    ${topBar(cid, crumb('Overview', `#/${cid}`) + crumb('Reference'), 'reference')}
+    ${topBar(cid, '', 'reference')}
     <main class="hb-main">
       <h1 class="hb-h1">${esc(ref.title)}</h1>
       <p class="hb-safety">${esc(ref.intro)}</p>
@@ -3476,6 +3478,13 @@ function renderApp() {
 
   document.getElementById('app').innerHTML = html + storageWarningHtml() + toastHtml();
   window.scrollTo(0, 0);
+  // Bug fix: scroll the breadcrumb bar (Line 1) to its trailing edge so the
+  // current, deepest crumb segment (e.g. the month just navigated to) is
+  // never left clipped off-screen on narrow viewports. Line 1's own CSS
+  // (.hb-crumbs: overflow-x:auto; white-space:nowrap; min-width:0) already
+  // makes it scrollable — this just keeps it scrolled to the active segment.
+  const crumbsEl = document.querySelector('.hb-crumbs');
+  if (crumbsEl) crumbsEl.scrollLeft = crumbsEl.scrollWidth;
 }
 
 function storageWarningHtml() {
@@ -3537,13 +3546,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (parts[0] === 'progress') {
-      const action = t.dataset && t.dataset.action;
-      if (action === 'bw-date-draft') {
-        PROGRESS_UI.bwDateDraft = t.value;
-      } else if (action === 'bw-weight-draft') {
-        PROGRESS_UI.bwWeightDraft = t.value;
-      }
+    // Bodyweight-log draft fields: relocated from the Progress screen onto
+    // every Week screen (§ fix — weight log now lives below Sunday's day
+    // card), so this can no longer be gated behind parts[0] === 'progress'.
+    if (t.dataset && t.dataset.action === 'bw-date-draft') {
+      PROGRESS_UI.bwDateDraft = t.value;
+      return;
+    }
+    if (t.dataset && t.dataset.action === 'bw-weight-draft') {
+      PROGRESS_UI.bwWeightDraft = t.value;
       return;
     }
 
@@ -3646,13 +3657,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (parts[0] === 'progress') {
-      if (action === 'log-bodyweight') {
-        const date = PROGRESS_UI.bwDateDraft || todayYMD();
-        setBodyweight(date, PROGRESS_UI.bwWeightDraft);
-        PROGRESS_UI.bwWeightDraft = '';
-        showToast(`Weight logged for ${date}`);
-      }
+    // Log-weight button: relocated from the Progress screen onto every Week
+    // screen, so this can no longer be gated behind parts[0] === 'progress'.
+    if (action === 'log-bodyweight') {
+      const date = PROGRESS_UI.bwDateDraft || todayYMD();
+      setBodyweight(date, PROGRESS_UI.bwWeightDraft);
+      PROGRESS_UI.bwWeightDraft = '';
+      renderApp();
+      showToast(`Weight logged for ${date}`);
       return;
     }
 
